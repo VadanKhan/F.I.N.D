@@ -1,0 +1,12 @@
+{
+  "_output_dir": "C:\\Users\\Vadan.Khan\\Documents\\Project",
+  "_template": "http://gitlab.yasa.com/will.beresford/cookiecutter-hyper-acc-dragon.git",
+  "author": "YASA Ltd.",
+  "copyright_year": "2023",
+  "email": "motor.innovation@yasa.com",
+  "friendly_name": "Eolt Root Cause Analyser",
+  "gitlab_user_or_group": "eolt",
+  "package_name": "eolt_root_cause_analyser",
+  "project_name": "eolt-root-cause-analyser",
+  "version": "0.0.0"
+}

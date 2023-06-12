@@ -1,0 +1,98 @@
+[tool.poetry]
+name = "eolt-root-cause-analyser"
+version = "0.0.0"
+description = "Eolt Root Cause Analyser"
+authors = ["YASA Ltd. <motor.innovation@yasa.com>"]
+license = "None"
+readme = "README.md"
+homepage = "http://gitlab.yasa.com/eolt/eolt-root-cause-analyser"
+repository = "http://gitlab.yasa.com/eolt/eolt-root-cause-analyser"
+documentation = "placeholder for docs link"
+[tool.poetry.urls]
+Changelog = "http://gitlab.yasa.com/eolt/eolt-root-cause-analyser/-/tags"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.11"
+
+[tool.poetry.group.pre-commit]
+optional = true
+
+[tool.poetry.group.pre-commit.dependencies]
+black = ">=21.10b0"
+pep8-naming = "^0.12.1"
+pre-commit = "^2.15.0"
+pre-commit-hooks = "^4.0.1"
+pyupgrade = "^2.29.0"
+reorder-python-imports = "^2.6.0"
+setuptools = "^58.5.3"
+darglint = "^1.8.1"
+
+[tool.poetry.group.coverage]
+optional = true
+
+[tool.poetry.group.coverage.dependencies]
+coverage = {extras = ["toml"], version = "^6.1"}
+
+[tool.poetry.group.tests]
+optional = true
+
+[tool.poetry.group.tests.dependencies]
+pytest = "^6.2.5"
+Pygments = "^2.10.0"
+
+[tool.poetry.group.mypy]
+optional = true
+
+[tool.poetry.group.mypy.dependencies]
+mypy = "^0.981"
+
+[tool.poetry.group.typeguard]
+optional = true
+
+[tool.poetry.group.typeguard.dependencies]
+typeguard = "^2.13.0"
+
+[tool.poetry.group.xdoctest]
+optional = true
+
+[tool.poetry.group.xdoctest.dependencies]
+xdoctest = {extras = ["colors"], version = "^0.15.10"}
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^4.3.0"
+sphinx-autobuild = ">=2021.3.14"
+sphinx-click = "^3.0.2"
+furo = ">=2021.11.12"
+
+[tool.poetry.group.pyinstaller]
+optional = true
+
+[tool.poetry.group.pyinstaller.dependencies]
+pyinstaller = "^5.6.1"
+
+[tool.poetry.group.vscode.dependencies]
+ipykernel = "^6.17.1"
+
+[[tool.poetry.source]]
+name = "yasa"
+url = "http://10.1.255.13:3141/root/dev/+simple/"
+default = true
+secondary = false
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+strict = false
+warn_unreachable = true
+pretty = true
+show_column_numbers = true
+show_error_codes = true
+show_error_context = true
+ignore_missing_imports = true
+follow_imports = "silent"
+follow_imports_for_stubs = true
