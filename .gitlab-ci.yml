@@ -79,4 +79,3 @@ pages: #this job runs on puses to the main branch
       - public
   only:
     - main
-
