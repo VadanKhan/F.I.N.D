@@ -237,7 +237,7 @@ def docs(session: nox.Session) -> None:
     # session.run("sphinx-autobuild", *args)
 
 
-@nox.session(python=python_versions[0])
+@nox.session(python="3.10-32")
 def pyinstaller(session: nox.Session) -> None:
     """Build the package into an executable using pyinstaller"""
     args = session.posargs or []
