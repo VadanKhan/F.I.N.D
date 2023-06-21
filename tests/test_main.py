@@ -5,9 +5,19 @@ import click.testing
 import eolt_root_cause_analyser.cli as cli
 
 
-def test_begin_prints_error_too_many():
-    """This tests that an error message is printed when there are too many args."""
+def test_begin_correct_printing():
+    """This tests the correcting echoing from the cli base script"""
     runner = click.testing.CliRunner()
-    with mock.patch("builtins.print") as print:
-        runner.invoke(cli.begin, ["--info", "string1, string2, string3, string4"])
-        print.assert_called_once_with("Error: Too many arguments")
+    with mock.patch("click.echo") as print:
+        runner.invoke(
+            cli.begin,
+            [
+                "--failure_code",
+                "string1",
+                "--test_id",
+                "string2",
+                "--test_type_id",
+                "string3",
+            ],
+        )
+        print.assert_called_once_with("received inputs: failure_code=string1, test_id=string2, test_type_id=string3")

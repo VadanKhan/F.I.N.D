@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "eolt-root-cause-analyser"
-version = "0.9.0"
+version = "0.10.0"
 description = "Eolt Root Cause Analyser"
 authors = ["YASA Ltd. <motor.innovation@yasa.com>"]
 license = "None"
