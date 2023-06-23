@@ -29,10 +29,11 @@ def install(session: nox.Session, *, groups: Iterable[str], root: bool = True) -
     To avoid an editable install, the root package is not installed using
     ``poetry install``. Instead, the function invokes ``pip install .``
     to perform a PEP 517 build.
+
     Args:
-        session: The nox.Session object.
-        groups: The dependency groups to install.
-        root: Install the root package.
+        session (nox.Session): The nox.Session object.
+        groups (Iterable[str]): The dependency groups to install.
+        root (bool): Install the root package.
     """
     session.run_always(
         "poetry",
@@ -51,9 +52,11 @@ def export_requirements(session: nox.Session, *, extras: Iterable[str] = ()) -> 
     This function uses ``poetry export`` to generate a requirements file
     containing the default dependencies at the versions specified in
     ``poetry.lock``.
+
     Args:
         session: The nox.Session object.
         extras: Extras supported by the project.
+
     Returns:
         The path to the requirements file.
     """
@@ -97,7 +100,7 @@ def activate_virtualenv_in_precommit_hooks(session: nox.Session) -> None:
     that environment when invoked from git.
 
     Args:
-        session: The nox.Session object.
+        session (nox.Session): The nox.Session object.
     """
     assert session.bin is not None  # noqa: S101
 
@@ -162,7 +165,7 @@ def activate_virtualenv_in_precommit_hooks(session: nox.Session) -> None:
 @nox.session(name="pre-commit", python=python_versions[0])
 def precommit(session: nox.Session) -> None:
     """Lint using pre-commit."""
-    args = session.posargs or ["run", "--all-files", "--hooks-stage=manual"]
+    args = session.posargs or ["run", "--all-files", "--hook-stage=manual"]
     install(session, groups=["pre-commit"], root=False)
     session.run("pre-commit", *args)
     if args and args[0] == "install":
@@ -189,7 +192,7 @@ def tests(session: nox.Session) -> None:
         session.install("coverage[toml]==6.1.2")
 
     try:
-        session.run("coverage", "run", "--parallel", "-m", "pytest", *session.posargs)
+        session.run("coverage", "run", "--parallel", "-m", "pytest", "--junitxml=pytest.xml", *session.posargs)
     finally:
         session.notify("coverage", posargs=[])
 
@@ -237,7 +240,7 @@ def docs(session: nox.Session) -> None:
     # session.run("sphinx-autobuild", *args)
 
 
-@nox.session(python=python_versions[0])
+@nox.session(python="3.10-32")
 def pyinstaller(session: nox.Session) -> None:
     """Build the package into an executable using pyinstaller"""
     args = session.posargs or []

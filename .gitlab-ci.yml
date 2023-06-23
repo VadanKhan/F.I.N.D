@@ -49,6 +49,13 @@ unit-test-job: # This job runs in the test stage.
   script:
     - nox --version
     - nox -r
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+      junit: pytest.xml
+  coverage: '/TOTAL.*\s+(\d+%)$/'
 
 # lint-test-job:   # This job also runs in the test stage.
 #   stage: test    # It can run at the same time as unit-test-job (in parallel).
@@ -79,4 +86,3 @@ pages: #this job runs on puses to the main branch
       - public
   only:
     - main
-

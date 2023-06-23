@@ -1,15 +1,23 @@
 """Test cases for the __main__ module."""
-import pytest
+from unittest import mock
 
-from eolt_root_cause_analyser import __main__
+import click.testing
+import eolt_root_cause_analyser.cli as cli
 
 
-def test_main_succeeds() -> None:
-    """Main exits with no exceptions."""
-    error = None
-    try:
-        __main__.main()
-    except Exception as e:
-        error = e
-    assert not error
-        
+def test_begin_correct_printing():
+    """This tests the correcting echoing from the cli base script"""
+    runner = click.testing.CliRunner()
+    with mock.patch("click.echo") as print:
+        runner.invoke(
+            cli.begin,
+            [
+                "--failure_code",
+                "string1",
+                "--test_id",
+                "string2",
+                "--test_type_id",
+                "string3",
+            ],
+        )
+        print.assert_called_once_with("received inputs: failure_code=string1, test_id=string2, test_type_id=string3")
