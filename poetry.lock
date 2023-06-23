@@ -604,23 +604,6 @@ url = "http://10.1.255.13:3141/root/dev/+simple"
 reference = "yasa"
 
 [[package]]
-name = "darglint"
-version = "23.6.22"
-description = "A utility for ensuring Google-style docstrings stay up to date with the source code."
-category = "dev"
-optional = false
-python-versions = ">=3.6,<4.0"
-files = [
-    {file = "darglint-23.6.22-py3-none-any.whl", hash = "sha256:6d1ff234210daaea2b830216a9a210cee6c754443d52b4a6c9ef72417772d8b0"},
-    {file = "darglint-23.6.22.tar.gz", hash = "sha256:7293de046a3d18696870d6c93eca9143ee1141efa97eb5b173080df5ce391340"},
-]
-
-[package.source]
-type = "legacy"
-url = "http://10.1.255.13:3141/root/dev/+simple"
-reference = "yasa"
-
-[[package]]
 name = "debugpy"
 version = "1.6.7"
 description = "An implementation of the Debug Adapter Protocol for Python"
@@ -2742,6 +2725,23 @@ url = "http://10.1.255.13:3141/root/dev/+simple"
 reference = "yasa"
 
 [[package]]
+name = "yasa-darglint"
+version = "23.6.23"
+description = "A utility for ensuring Google-style docstrings stay up to date with the source code."
+category = "dev"
+optional = false
+python-versions = ">=3.6,<4.0"
+files = [
+    {file = "yasa_darglint-23.6.23-py3-none-any.whl", hash = "sha256:1ccaa8c1403148850c34a01ddefba6fd294695fa125d1f217ab6d9031f160d01"},
+    {file = "yasa_darglint-23.6.23.tar.gz", hash = "sha256:f2bc1d630304bdf77cc4ec22188f26b717214e5cc332a5ade1f941df6f9b6e90"},
+]
+
+[package.source]
+type = "legacy"
+url = "http://10.1.255.13:3141/root/dev/+simple"
+reference = "yasa"
+
+[[package]]
 name = "zipp"
 version = "3.15.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
@@ -2765,4 +2765,4 @@ reference = "yasa"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.11"
-content-hash = "7d1f3dbae7cb5d125170d7363650a853b35b6125587e318e108392b4481e220a"
+content-hash = "371b5fd1aa87566104f8218617a95d052b9ff040f4c6cc2a77edbe95a78c27fe"
