@@ -1,5 +1,5 @@
 import click
-from logic_toplevel import logic
+from eolt_root_cause_analyser.logic_toplevel import logic
 
 
 @click.command()

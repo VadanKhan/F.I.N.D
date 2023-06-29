@@ -30,7 +30,7 @@ def read_tdms(filename):
         DataFrame: A Pandas DataFrame containing the data from the TDMS file.
     """
     df = yasa_file_io.tdms.read_tdms_as_dataframe(
-        Path(rf"\\QNAP-463\eol\{filename}"),
+        Path(rf"C:\Users\Vadan.Khan\Documents\Project\Sample TDMS files\{filename}"),
         channel_map={"Ambient_new": "Ambient"},
         extract_all=True,
         fuzzy_matching=True,

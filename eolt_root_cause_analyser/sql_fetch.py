@@ -26,9 +26,6 @@ def eolt_connect() -> pyodbc.Connection:
     return connection
 
 
-connection = eolt_connect()
-
-
 def fetch_eol(test_id, test_type_id):
     """Fetches the EOL_Test_ID from the database table Test_{test_type_id} where Test_ID is equal to the given test_id.
 
@@ -40,6 +37,7 @@ def fetch_eol(test_id, test_type_id):
         int or Error: The fetched EOL_Test_ID or an error object if an error occurred.
     """
     try:
+        connection = eolt_connect()
         eol_test_id = pd.read_sql_query(
             f"SELECT EOL_Test_ID from Test_{test_type_id} WHERE Test_ID={test_id}", connection
         )

@@ -1,6 +1,6 @@
-from sql_fetch import fetch_eol
-from tdms_fetch import form_filename_tdms
-from tdms_fetch import read_tdms
+from eolt_root_cause_analyser.sql_fetch import fetch_eol
+from eolt_root_cause_analyser.tdms_fetch import form_filename_tdms
+from eolt_root_cause_analyser.tdms_fetch import read_tdms
 
 
 def logic(failure_code, test_id, test_type_id):
