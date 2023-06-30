@@ -84,6 +84,10 @@ pyinstaller = "^5.6.1"
 [tool.poetry.group.vscode.dependencies]
 ipykernel = "^6.17.1"
 
+
+[tool.poetry.group.dev.dependencies]
+black = "^21.10b0"
+
 [[tool.poetry.source]]
 name = "yasa"
 url = "http://10.1.255.13:3141/root/dev/+simple/"

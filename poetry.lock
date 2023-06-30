@@ -184,50 +184,28 @@ reference = "yasa"
 
 [[package]]
 name = "black"
-version = "23.3.0"
+version = "21.12b0"
 description = "The uncompromising code formatter."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.6.2"
 files = [
-    {file = "black-23.3.0-cp310-cp310-macosx_10_16_arm64.whl", hash = "sha256:0945e13506be58bf7db93ee5853243eb368ace1c08a24c65ce108986eac65915"},
-    {file = "black-23.3.0-cp310-cp310-macosx_10_16_universal2.whl", hash = "sha256:67de8d0c209eb5b330cce2469503de11bca4085880d62f1628bd9972cc3366b9"},
-    {file = "black-23.3.0-cp310-cp310-macosx_10_16_x86_64.whl", hash = "sha256:7c3eb7cea23904399866c55826b31c1f55bbcd3890ce22ff70466b907b6775c2"},
-    {file = "black-23.3.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:32daa9783106c28815d05b724238e30718f34155653d4d6e125dc7daec8e260c"},
-    {file = "black-23.3.0-cp310-cp310-win_amd64.whl", hash = "sha256:35d1381d7a22cc5b2be2f72c7dfdae4072a3336060635718cc7e1ede24221d6c"},
-    {file = "black-23.3.0-cp311-cp311-macosx_10_16_arm64.whl", hash = "sha256:a8a968125d0a6a404842fa1bf0b349a568634f856aa08ffaff40ae0dfa52e7c6"},
-    {file = "black-23.3.0-cp311-cp311-macosx_10_16_universal2.whl", hash = "sha256:c7ab5790333c448903c4b721b59c0d80b11fe5e9803d8703e84dcb8da56fec1b"},
-    {file = "black-23.3.0-cp311-cp311-macosx_10_16_x86_64.whl", hash = "sha256:a6f6886c9869d4daae2d1715ce34a19bbc4b95006d20ed785ca00fa03cba312d"},
-    {file = "black-23.3.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6f3c333ea1dd6771b2d3777482429864f8e258899f6ff05826c3a4fcc5ce3f70"},
-    {file = "black-23.3.0-cp311-cp311-win_amd64.whl", hash = "sha256:11c410f71b876f961d1de77b9699ad19f939094c3a677323f43d7a29855fe326"},
-    {file = "black-23.3.0-cp37-cp37m-macosx_10_16_x86_64.whl", hash = "sha256:1d06691f1eb8de91cd1b322f21e3bfc9efe0c7ca1f0e1eb1db44ea367dff656b"},
-    {file = "black-23.3.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:50cb33cac881766a5cd9913e10ff75b1e8eb71babf4c7104f2e9c52da1fb7de2"},
-    {file = "black-23.3.0-cp37-cp37m-win_amd64.whl", hash = "sha256:e114420bf26b90d4b9daa597351337762b63039752bdf72bf361364c1aa05925"},
-    {file = "black-23.3.0-cp38-cp38-macosx_10_16_arm64.whl", hash = "sha256:48f9d345675bb7fbc3dd85821b12487e1b9a75242028adad0333ce36ed2a6d27"},
-    {file = "black-23.3.0-cp38-cp38-macosx_10_16_universal2.whl", hash = "sha256:714290490c18fb0126baa0fca0a54ee795f7502b44177e1ce7624ba1c00f2331"},
-    {file = "black-23.3.0-cp38-cp38-macosx_10_16_x86_64.whl", hash = "sha256:064101748afa12ad2291c2b91c960be28b817c0c7eaa35bec09cc63aa56493c5"},
-    {file = "black-23.3.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:562bd3a70495facf56814293149e51aa1be9931567474993c7942ff7d3533961"},
-    {file = "black-23.3.0-cp38-cp38-win_amd64.whl", hash = "sha256:e198cf27888ad6f4ff331ca1c48ffc038848ea9f031a3b40ba36aced7e22f2c8"},
-    {file = "black-23.3.0-cp39-cp39-macosx_10_16_arm64.whl", hash = "sha256:3238f2aacf827d18d26db07524e44741233ae09a584273aa059066d644ca7b30"},
-    {file = "black-23.3.0-cp39-cp39-macosx_10_16_universal2.whl", hash = "sha256:f0bd2f4a58d6666500542b26354978218a9babcdc972722f4bf90779524515f3"},
-    {file = "black-23.3.0-cp39-cp39-macosx_10_16_x86_64.whl", hash = "sha256:92c543f6854c28a3c7f39f4d9b7694f9a6eb9d3c5e2ece488c327b6e7ea9b266"},
-    {file = "black-23.3.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3a150542a204124ed00683f0db1f5cf1c2aaaa9cc3495b7a3b5976fb136090ab"},
-    {file = "black-23.3.0-cp39-cp39-win_amd64.whl", hash = "sha256:6b39abdfb402002b8a7d030ccc85cf5afff64ee90fa4c5aebc531e3ad0175ddb"},
-    {file = "black-23.3.0-py3-none-any.whl", hash = "sha256:ec751418022185b0c1bb7d7736e6933d40bbb14c14a0abcf9123d1b159f98dd4"},
-    {file = "black-23.3.0.tar.gz", hash = "sha256:1c7b8d606e728a41ea1ccbd7264677e494e87cf630e399262ced92d4a8dac940"},
+    {file = "black-21.12b0-py3-none-any.whl", hash = "sha256:a615e69ae185e08fdd73e4715e260e2479c861b5740057fde6e8b4e3b7dd589f"},
+    {file = "black-21.12b0.tar.gz", hash = "sha256:77b80f693a569e2e527958459634f18df9b0ba2625ba4e0c2d5da5be42e6f2b3"},
 ]
 
 [package.dependencies]
-click = ">=8.0.0"
+click = ">=7.1.2"
 mypy-extensions = ">=0.4.3"
-packaging = ">=22.0"
-pathspec = ">=0.9.0"
+pathspec = ">=0.9.0,<1"
 platformdirs = ">=2"
-tomli = {version = ">=1.1.0", markers = "python_version < \"3.11\""}
+tomli = ">=0.2.6,<2.0.0"
+typing-extensions = {version = ">=3.10.0.0,<3.10.0.1 || >3.10.0.1", markers = "python_version >= \"3.10\""}
 
 [package.extras]
 colorama = ["colorama (>=0.4.3)"]
 d = ["aiohttp (>=3.7.4)"]
 jupyter = ["ipython (>=7.8.0)", "tokenize-rt (>=3.2.0)"]
+python2 = ["typed-ast (>=1.4.3)"]
 uvloop = ["uvloop (>=0.15.2)"]
 
 [package.source]
@@ -832,13 +810,13 @@ reference = "yasa"
 
 [[package]]
 name = "ipykernel"
-version = "6.23.2"
+version = "6.23.3"
 description = "IPython Kernel for Jupyter"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "ipykernel-6.23.2-py3-none-any.whl", hash = "sha256:7ccb6e2d32fd958c21453db494c914f3474908a2fdefd99ab548a5375b548d1f"},
-    {file = "ipykernel-6.23.2.tar.gz", hash = "sha256:fcfb67c5b504aa1bfcda1c5b3716636239e0f7b9290958f1c558c79b4c0e7ed5"},
+    {file = "ipykernel-6.23.3-py3-none-any.whl", hash = "sha256:bc00662dc44d4975b668cdb5fefb725e38e9d8d6e28441a519d043f38994922d"},
+    {file = "ipykernel-6.23.3.tar.gz", hash = "sha256:dd4e18116357f36a1e459b3768412371bee764c51844cbf25c4ed1eb9cae4a54"},
 ]
 
 [package.dependencies]
@@ -959,13 +937,13 @@ reference = "yasa"
 
 [[package]]
 name = "jupyter-client"
-version = "8.2.0"
+version = "8.3.0"
 description = "Jupyter protocol implementation and client libraries"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "jupyter_client-8.2.0-py3-none-any.whl", hash = "sha256:b18219aa695d39e2ad570533e0d71fb7881d35a873051054a84ee2a17c4b7389"},
-    {file = "jupyter_client-8.2.0.tar.gz", hash = "sha256:9fe233834edd0e6c0aa5f05ca2ab4bdea1842bfd2d8a932878212fc5301ddaf0"},
+    {file = "jupyter_client-8.3.0-py3-none-any.whl", hash = "sha256:7441af0c0672edc5d28035e92ba5e32fadcfa8a4e608a434c228836a89df6158"},
+    {file = "jupyter_client-8.3.0.tar.gz", hash = "sha256:3af69921fe99617be1670399a0b857ad67275eefcfa291e2c81a160b7b650f5f"},
 ]
 
 [package.dependencies]
@@ -1619,13 +1597,13 @@ reference = "yasa"
 
 [[package]]
 name = "platformdirs"
-version = "3.7.0"
+version = "3.8.0"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "platformdirs-3.7.0-py3-none-any.whl", hash = "sha256:cfd065ba43133ff103ab3bd10aecb095c2a0035fcd1f07217c9376900d94ba07"},
-    {file = "platformdirs-3.7.0.tar.gz", hash = "sha256:87fbf6473e87c078d536980ba970a472422e94f17b752cfad17024c18876d481"},
+    {file = "platformdirs-3.8.0-py3-none-any.whl", hash = "sha256:ca9ed98ce73076ba72e092b23d3c93ea6c4e186b3f1c3dad6edd98ff6ffcca2e"},
+    {file = "platformdirs-3.8.0.tar.gz", hash = "sha256:b0cabcb11063d21a0b261d557acb0a9d2126350e63b70cdf7db6347baea456dc"},
 ]
 
 [package.extras]
@@ -1870,23 +1848,23 @@ reference = "yasa"
 
 [[package]]
 name = "pyinstaller"
-version = "5.12.0"
+version = "5.13.0"
 description = "PyInstaller bundles a Python application and all its dependencies into a single package."
 optional = false
-python-versions = "<3.12,>=3.7"
+python-versions = "<3.13,>=3.7"
 files = [
-    {file = "pyinstaller-5.12.0-py3-none-macosx_10_13_universal2.whl", hash = "sha256:edcb6eb6618f3b763c11487db1d3516111d54bd5598b9470e295c1f628a95496"},
-    {file = "pyinstaller-5.12.0-py3-none-manylinux2014_aarch64.whl", hash = "sha256:303952c2a8ece894b655c2a0783a0bdc844282f47790707446bde3eaf355f0da"},
-    {file = "pyinstaller-5.12.0-py3-none-manylinux2014_i686.whl", hash = "sha256:7eed9996c12aeee7530cbc7c57350939f46391ecf714ac176579190dbd3ec7bf"},
-    {file = "pyinstaller-5.12.0-py3-none-manylinux2014_ppc64le.whl", hash = "sha256:96ad645347671c9fce190506c09523c02f01a503fe3ea65f79bb0cfe22a8c83e"},
-    {file = "pyinstaller-5.12.0-py3-none-manylinux2014_s390x.whl", hash = "sha256:c3ceb6c3a34b9407ba16fb68a32f83d5fd94f21d43d9fe38d8f752feb75ca5bb"},
-    {file = "pyinstaller-5.12.0-py3-none-manylinux2014_x86_64.whl", hash = "sha256:92eeacd052092a0a4368f50ddecbeb6e020b5a70cdf113243fbd6bd8ee25524e"},
-    {file = "pyinstaller-5.12.0-py3-none-musllinux_1_1_aarch64.whl", hash = "sha256:3605ac72311318455907a88efb4a4b334b844659673a2a371bbaac2d8b52843a"},
-    {file = "pyinstaller-5.12.0-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:d14c1c2b753af5efed96584f075a6740ea634ca55789113d325dc8c32aef50fe"},
-    {file = "pyinstaller-5.12.0-py3-none-win32.whl", hash = "sha256:b64d8a3056e6c7e4ed4d1f95e793ef401bf5b166ef00ad544b5812be0ac63b4b"},
-    {file = "pyinstaller-5.12.0-py3-none-win_amd64.whl", hash = "sha256:62d75bb70cdbeea1a0d55067d7201efa2f7d7c19e56c241291c03d551b531684"},
-    {file = "pyinstaller-5.12.0-py3-none-win_arm64.whl", hash = "sha256:2f70e2d9b032e5f24a336f41affcb4624e66a84cd863ba58f6a92bd6040653bb"},
-    {file = "pyinstaller-5.12.0.tar.gz", hash = "sha256:a1c2667120730604c3ad1e0739a45bb72ca4a502a91e2f5c5b220fbfbb05f0d4"},
+    {file = "pyinstaller-5.13.0-py3-none-macosx_10_13_universal2.whl", hash = "sha256:7fdd319828de679f9c5e381eff998ee9b4164bf4457e7fca56946701cf002c3f"},
+    {file = "pyinstaller-5.13.0-py3-none-manylinux2014_aarch64.whl", hash = "sha256:0df43697c4914285ecd333be968d2cd042ab9b2670124879ee87931d2344eaf5"},
+    {file = "pyinstaller-5.13.0-py3-none-manylinux2014_i686.whl", hash = "sha256:28d9742c37e9fb518444b12f8c8ab3cb4ba212d752693c34475c08009aa21ccf"},
+    {file = "pyinstaller-5.13.0-py3-none-manylinux2014_ppc64le.whl", hash = "sha256:e5fb17de6c325d3b2b4ceaeb55130ad7100a79096490e4c5b890224406fa42f4"},
+    {file = "pyinstaller-5.13.0-py3-none-manylinux2014_s390x.whl", hash = "sha256:78975043edeb628e23a73fb3ef0a273cda50e765f1716f75212ea3e91b09dede"},
+    {file = "pyinstaller-5.13.0-py3-none-manylinux2014_x86_64.whl", hash = "sha256:cd7d5c06f2847195a23d72ede17c60857d6f495d6f0727dc6c9bc1235f2eb79c"},
+    {file = "pyinstaller-5.13.0-py3-none-musllinux_1_1_aarch64.whl", hash = "sha256:24009eba63cfdbcde6d2634e9c87f545eb67249ddf3b514e0cd3b2cdaa595828"},
+    {file = "pyinstaller-5.13.0-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:1fde4381155f21d6354dc450dcaa338cd8a40aaacf6bd22b987b0f3e1f96f3ee"},
+    {file = "pyinstaller-5.13.0-py3-none-win32.whl", hash = "sha256:2d03419904d1c25c8968b0ad21da0e0f33d8d65716e29481b5bd83f7f342b0c5"},
+    {file = "pyinstaller-5.13.0-py3-none-win_amd64.whl", hash = "sha256:9fc27c5a853b14a90d39c252707673c7a0efec921cd817169aff3af0fca8c127"},
+    {file = "pyinstaller-5.13.0-py3-none-win_arm64.whl", hash = "sha256:3a331951f9744bc2379ea5d65d36f3c828eaefe2785f15039592cdc08560b262"},
+    {file = "pyinstaller-5.13.0.tar.gz", hash = "sha256:5e446df41255e815017d96318e39f65a3eb807e74a796c7e7ff7f13b6366a2e9"},
 ]
 
 [package.dependencies]
@@ -1894,7 +1872,7 @@ altgraph = "*"
 macholib = {version = ">=1.8", markers = "sys_platform == \"darwin\""}
 pefile = {version = ">=2022.5.30", markers = "sys_platform == \"win32\""}
 pyinstaller-hooks-contrib = ">=2021.4"
-pywin32-ctypes = {version = ">=0.2.0", markers = "sys_platform == \"win32\""}
+pywin32-ctypes = {version = ">=0.2.1", markers = "sys_platform == \"win32\""}
 setuptools = ">=42.0.0"
 
 [package.extras]
@@ -1908,13 +1886,13 @@ reference = "yasa"
 
 [[package]]
 name = "pyinstaller-hooks-contrib"
-version = "2023.3"
+version = "2023.4"
 description = "Community maintained hooks for PyInstaller"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pyinstaller-hooks-contrib-2023.3.tar.gz", hash = "sha256:bb39e1038e3e0972420455e0b39cd9dce73f3d80acaf4bf2b3615fea766ff370"},
-    {file = "pyinstaller_hooks_contrib-2023.3-py2.py3-none-any.whl", hash = "sha256:062ad7a1746e1cfc24d3a8c4be4e606fced3b123bda7d419f14fcf7507804b07"},
+    {file = "pyinstaller-hooks-contrib-2023.4.tar.gz", hash = "sha256:9c11197653de9605a81975325a60b9369e9cdc37c009b6aeb0221a57211f9388"},
+    {file = "pyinstaller_hooks_contrib-2023.4-py2.py3-none-any.whl", hash = "sha256:fc9892e46fa19d05725205413fb21a764f2f6ff1e70ba95322fb02420a665a45"},
 ]
 
 [package.source]
@@ -2103,13 +2081,13 @@ reference = "yasa"
 
 [[package]]
 name = "pywin32-ctypes"
-version = "0.2.1"
+version = "0.2.2"
 description = "A (partial) reimplementation of pywin32 using ctypes/cffi"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "pywin32-ctypes-0.2.1.tar.gz", hash = "sha256:934a2def1e5cbc472b2b6bf80680c0f03cd87df65dfd58bfd1846969de095b03"},
-    {file = "pywin32_ctypes-0.2.1-py3-none-any.whl", hash = "sha256:b9a53ef754c894a525469933ab2a447c74ec1ea6b9d2ef446f40ec50d3dcec9f"},
+    {file = "pywin32-ctypes-0.2.2.tar.gz", hash = "sha256:3426e063bdd5fd4df74a14fa3cf80a0b42845a87e1d1e81f6549f9daec593a60"},
+    {file = "pywin32_ctypes-0.2.2-py3-none-any.whl", hash = "sha256:bf490a1a709baf35d688fe0ecf980ed4de11d2b3e37b51e5442587a75d9957e7"},
 ]
 
 [package.source]
@@ -2907,13 +2885,13 @@ reference = "yasa"
 
 [[package]]
 name = "tomli"
-version = "2.0.1"
+version = "1.2.3"
 description = "A lil' TOML parser"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.6"
 files = [
-    {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
-    {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
+    {file = "tomli-1.2.3-py3-none-any.whl", hash = "sha256:e3069e4be3ead9668e21cb9b074cd948f7b3113fd9c8bba083f48247aab8b11c"},
+    {file = "tomli-1.2.3.tar.gz", hash = "sha256:05b6166bff487dc068d322585c7ea4ef78deed501cc124060e0f238e89a9231f"},
 ]
 
 [package.source]
@@ -2988,13 +2966,13 @@ reference = "yasa"
 
 [[package]]
 name = "typing-extensions"
-version = "4.6.3"
+version = "4.7.0"
 description = "Backported and Experimental Type Hints for Python 3.7+"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "typing_extensions-4.6.3-py3-none-any.whl", hash = "sha256:88a4153d8505aabbb4e13aacb7c486c2b4a33ca3b3f807914a9b4c844c471c26"},
-    {file = "typing_extensions-4.6.3.tar.gz", hash = "sha256:d91d5919357fe7f681a9f2b5b4cb2a5f1ef0a1e9f59c4d8ff0d3491e05c0ffd5"},
+    {file = "typing_extensions-4.7.0-py3-none-any.whl", hash = "sha256:5d8c9dac95c27d20df12fb1d97b9793ab8b2af8a3a525e68c80e21060c161771"},
+    {file = "typing_extensions-4.7.0.tar.gz", hash = "sha256:935ccf31549830cda708b42289d44b6f74084d616a00be651601a4f968e77c82"},
 ]
 
 [package.source]
@@ -3134,4 +3112,4 @@ reference = "yasa"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "c3fab5c7e0c251e5368dc616429f5f881887badf78ed76390f6568bbedd20e03"
+content-hash = "9ff0ea799236c9ce21a3872aac8e74432993bb9bf91764e5981af4d89002754e"

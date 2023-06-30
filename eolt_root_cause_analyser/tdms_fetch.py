@@ -1,3 +1,4 @@
+import warnings
 from pathlib import Path
 
 import pandas as pd
@@ -20,7 +21,7 @@ def form_filename_tdms(test_id, test_type_id, eol_test_id):
 
 
 def read_tdms(filename):
-    """Reads a QNAP EOL TDMS file and returns its contents as a Pandas DataFrame.
+    """Reads a EOL TDMS file and returns its contents as a Pandas DataFrame.
     NOTE: THIS STEP HAS A LARGE RUNTIME ~20 SECONDS if connecting to QNAP
 
     Args:
@@ -29,13 +30,17 @@ def read_tdms(filename):
     Returns:
         DataFrame: A Pandas DataFrame containing the data from the TDMS file.
     """
-    df = yasa_file_io.tdms.read_tdms_as_dataframe(
-        Path(rf"C:\Users\Vadan.Khan\Documents\Project\Sample TDMS files\{filename}"),
-        channel_map={"Ambient_new": "Ambient"},
-        extract_all=True,
-        fuzzy_matching=True,
-        drop_duplicates=False,
-        fuzzy_match_score=50.0,
-        search_terms_as_keys=False,
-    )
-    return df
+    try:
+        df = yasa_file_io.tdms.read_tdms_as_dataframe(
+            Path(rf"C:\Users\Vadan.Khan\Documents\Project\Sample TDMS files\{filename}"),
+            channel_map={"Ambient_new": "Ambient"},
+            extract_all=True,
+            fuzzy_matching=True,
+            drop_duplicates=False,
+            fuzzy_match_score=50.0,
+            search_terms_as_keys=False,
+        )
+        return df
+    except Exception:
+        warnings.warn("Accessing TDMS Failed", UserWarning)
+        return None
