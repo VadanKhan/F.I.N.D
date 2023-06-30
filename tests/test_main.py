@@ -36,7 +36,7 @@ def test_fetch_eol_success(monkeypatch):
 
     Args:
         monkeypatch: The pytest monkeypatch fixture, used to temporarily replace the pd.read_sql_query function with a
-        mock function.
+            mock function.
 
     """
     # Set up mock return value
@@ -58,7 +58,7 @@ def test_fetch_eol_error(monkeypatch):
 
     Args:
         monkeypatch: The pytest monkeypatch fixture, used to temporarily replace the pd.read_sql_query function with a
-        mock function that raises an error.
+            mock function that raises an error.
 
     """
     # Set up mock side effect to raise an error
@@ -101,10 +101,11 @@ def test_read_tdms_exception(monkeypatch):
     """Tests the read_tdms function using monkeypatching to mock the yasa_file_io.tdms.read_tdms_as_dataframe function
     and raise an exception.
     Checks that exceptions are as expected.
+
     Args:
         monkeypatch: The pytest monkeypatch fixture, used to temporarily replace the
-        yasa_file_io.tdms.read_tdms_as_dataframe
-        function with a mock function that raises an exception.
+            yasa_file_io.tdms.read_tdms_as_dataframe
+            function with a mock function that raises an exception.
 
     """
     # Patch the yasa_file_io.tdms.read_tdms_as_dataframe function to raise an exception
