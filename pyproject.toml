@@ -27,7 +27,7 @@ root_cause = "eolt_root_cause_analyser.cli:begin"
 optional = true
 
 [tool.poetry.group.pre-commit.dependencies]
-black = ">=21.10b0"
+black = "^22.3"
 pep8-naming = "^0.12.1"
 pre-commit = "^2.15.0"
 pre-commit-hooks = "^4.0.1"
@@ -84,10 +84,6 @@ pyinstaller = "^5.6.1"
 
 [tool.poetry.group.vscode.dependencies]
 ipykernel = "^6.17.1"
-
-
-[tool.poetry.group.dev.dependencies]
-black = "^21.10b0"
 
 [[tool.poetry.source]]
 name = "yasa"

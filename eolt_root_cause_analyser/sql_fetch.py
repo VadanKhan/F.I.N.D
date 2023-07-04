@@ -1,6 +1,5 @@
 import pandas as pd
 import pyodbc
-from mysql.connector import Error
 
 
 def eolt_connect() -> pyodbc.Connection:
@@ -11,18 +10,15 @@ def eolt_connect() -> pyodbc.Connection:
         connection (pyodbc.Connection): Initialises connection to EOLT database
 
     """
-    try:
-        connection = pyodbc.connect(
-            "DRIVER=SQL Server;"
-            r"SERVER=0150-D\EOLTESTER;"
-            "UID=EOLQuery;"
-            "PWD=Yasa1234;"
-            "APP=Python;"
-            "Trusted_Connection=yes;"
-            "Database=EOL Management"
-        )
-    except Error as err:
-        print(f"Error: '{err}'")
+    connection = pyodbc.connect(
+        "DRIVER={ODBC Driver 17 for SQL Server};"
+        r"SERVER=0150-D\EOLTESTER;"
+        "UID=EOLQuery;"
+        "PWD=Yasa1234;"
+        "APP=Python;"
+        "Trusted_Connection=yes;"
+        "Database=EOL Management"
+    )
     return connection
 
 
@@ -36,19 +32,13 @@ def fetch_eol(test_id, test_type_id):
     Returns:
         int or Error: The fetched EOL_Test_ID or an error object if an error occurred.
     """
-    try:
-        connection = eolt_connect()
-        eol_test_id = pd.read_sql_query(
-            f"SELECT EOL_Test_ID from Test_{test_type_id} WHERE Test_ID={test_id}", connection
-        )
-        eol_test_id_value = eol_test_id.iloc[0, 0]
-        print(f"\nReceived EOL Test ID: {eol_test_id_value}\n")
-        # print(eol_test_id)
+    connection = eolt_connect()
+    eol_test_id = pd.read_sql_query(f"SELECT EOL_Test_ID from Test_{test_type_id} WHERE Test_ID={test_id}", connection)
+    eol_test_id_value = eol_test_id.iloc[0, 0]
+    print(f"\nReceived EOL Test ID: {eol_test_id_value}\n")
+    # print(eol_test_id)
 
-        connection.close()
-    except Error as err:
-        print(f"Error: '{err}'")
-        eol_test_id_value = err
+    connection.close()
     return eol_test_id_value
 
 
