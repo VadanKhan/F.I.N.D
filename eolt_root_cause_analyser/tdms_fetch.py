@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 import yasa_file_io.tdms
+from nptdms import TdmsFile
 
 
 def form_filename_tdms(test_id, test_type_id, eol_test_id):
@@ -17,6 +18,7 @@ def form_filename_tdms(test_id, test_type_id, eol_test_id):
         str: The formed filename for the TDMS file.
     """
     filename = f"{eol_test_id}_{test_type_id}_{test_id}.tdms"
+    print(f"Looking for: {filename}\n")
     return filename
 
 
@@ -44,3 +46,22 @@ def read_tdms(filename):
     except Exception:
         warnings.warn("Accessing TDMS Failed", UserWarning)
         return None
+
+
+def read_tdms_to_df(filename):
+    tdms_file_path = Path(rf"C:\Users\Vadan.Khan\Documents\Project\Sample TDMS files\{filename}")
+    tdms_file = TdmsFile.read(tdms_file_path)
+
+    # Converting TDMS data to a pandas DataFrame
+    data = {}
+    for group in tdms_file.groups():
+        group_name = group.name
+        for channel in group.channels():
+            channel_name = channel.name
+            column_name = f"{group_name}/{channel_name}"
+            data[column_name] = channel[:]
+
+    # Creating a DataFrame with columns of unequal length
+    df = pd.DataFrame({k: pd.Series(v) for k, v in data.items()})
+
+    return df

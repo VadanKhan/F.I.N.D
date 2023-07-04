@@ -18,6 +18,7 @@ pandas = "^1.5.3"
 mysql-connector = "^2.2.9"
 pyodbc = "^4.0.39"
 yasa-file-io = "^23.4.13"
+matplotlib = "^3.7.1"
 
 [tool.poetry.scripts]
 root_cause = "eolt_root_cause_analyser.cli:begin"
