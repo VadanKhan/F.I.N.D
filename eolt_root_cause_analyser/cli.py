@@ -1,4 +1,5 @@
 import click
+from eolt_root_cause_analyser.logic_toplevel import logic
 
 
 @click.command()
@@ -25,4 +26,6 @@ import click
 )
 def begin(failure_code, test_id, test_type_id):
     """Simple program that prints out the input information as you call this cmd interface"""
-    click.echo(f"received inputs: failure_code={failure_code}, test_id={test_id}, test_type_id={test_type_id}")
+    click.echo(f"received inputs: failure code={failure_code}, test id={test_id}, test type id={test_type_id}")
+    logic(failure_code, test_id, test_type_id)
+    return failure_code, test_id, test_type_id
