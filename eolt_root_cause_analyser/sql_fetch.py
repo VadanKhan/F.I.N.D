@@ -2,7 +2,7 @@ import pandas as pd
 import pyodbc
 
 
-def eolt_connect() -> pyodbc.Connection:
+def eolt_connect():
     """
     Creates the initial connection to the EOLT database to be used by the pandas SQL queries
 
@@ -10,14 +10,15 @@ def eolt_connect() -> pyodbc.Connection:
         connection (pyodbc.Connection): Initialises connection to EOLT database
 
     """
+
     connection = pyodbc.connect(
         "DRIVER={ODBC Driver 17 for SQL Server};"
-        r"SERVER=0150-D\EOLTESTER;"
+        r"Server=10.30.0.2\EOLTESTER;"
+        "Database=EOL Management;"
         "UID=EOLQuery;"
         "PWD=Yasa1234;"
-        "APP=Python;"
+        "APP=Python"
         "Trusted_Connection=yes;"
-        "Database=EOL Management"
     )
     return connection
 
