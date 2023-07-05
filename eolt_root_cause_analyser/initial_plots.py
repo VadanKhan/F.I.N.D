@@ -7,8 +7,7 @@ from tdms_fetch import read_tdms
 df_filepath = form_filepath("23918_High_Speed_20140.tdms")
 df_test = read_tdms(df_filepath)
 RPS_time_list = get_time_series_data(df_filepath, ["AI DAQ - High Speed Inc RTD"], ["SinP", "SinN", "CosP", "CosN"])
-SinP = RPS_time_list[0]
-print(SinP)
+
 # time_dfs = get_time_series_data()
 
 
@@ -34,6 +33,9 @@ df = df_test
 print(f"{df}\n")
 columns = list(df.columns)
 print(columns)
+
+SinP = RPS_time_list[0]
+print(SinP)
 
 
 # sinN = df["AI DAQ - High Speed Inc RTD/SinN"]

@@ -27,7 +27,8 @@ def _fuzzy_match_dictionary(tdms_columns: list, channel_map: dict, fuzzy_match_s
         new_channel_map[key_match] = val
         if fuzzy_score <= fuzzy_match_score:
             warn(
-                f"fuzzy matched column scored {fuzzy_score}%, below threshold of {fuzzy_match_score}%. {key} mapped to {key_match}",
+                f"fuzzy matched column scored {fuzzy_score}%, below threshold of {fuzzy_match_score}%. {key} mapped to"
+                f"{key_match}",
                 stacklevel=2,
             )
 
@@ -109,11 +110,38 @@ def form_filename_tdms(test_id, test_type_id, eol_test_id):
 
 
 def form_filepath(filename):
+    """
+    Forms a file path for a TDMS file.
+
+    This function takes a filename as an argument and returns a Path object representing the full path to the TDMS file.
+        The path is constructed by joining the specified filename with a predefined base directory.
+
+    Args:
+        filename: The name of the TDMS file.
+
+    Returns:
+        A Path object representing the full path to the TDMS file.
+    """
+
     tdms_file_path = Path(rf"C:\Users\Vadan.Khan\Documents\Project\Sample TDMS files\{filename}")
     return tdms_file_path
 
 
 def read_tdms(tdms_file_path):
+    """
+    Reads data from a TDMS file and returns it as a pandas DataFrame.
+
+    This function takes the path to a TDMS file as an argument, reads the data from the file, and converts it into a
+        pandas DataFrame. The column names in the DataFrame are renamed according to a predefined channel map, using
+        fuzzy matching if necessary. Duplicate columns are removed, and all columns are extracted.
+
+    Args:
+        tdms_file_path: The path to the TDMS file to read.
+
+    Returns:
+        A pandas DataFrame containing the data from the TDMS file.
+    """
+
     tdms_file = TdmsFile.read(tdms_file_path)
 
     # Converting TDMS data to a pandas DataFrame
@@ -133,18 +161,22 @@ def read_tdms(tdms_file_path):
 
 def get_time_series_data(tdms_filepath, group_names: list[Any], channel_names: list[Any]) -> list[pd.DataFrame]:
     """
-    Gets the desired raw data (all dataframes stored in a list) along with test details.
+    Reads data from a TDMS file and returns it as a list of pandas DataFrames.
+
+    This function takes the path to a TDMS file, a list of group names, and a list of channel names as arguments.
+        It opens the TDMS file and reads the data for the specified groups and channels. The data is returned as a list
+        of pandas DataFrames, where each DataFrame contains the time and channel data for one of the specified channels.
 
     Args:
-        test_type (str): Defines the test type (either Cogging, High Speed or High Torque)
-        test_id (int): Test ID for given test type
-        group_names (list): The group names which the desired parameter is part of in TDMS file
-        channel_names (list): List of channel names of desired parameter
+        tdms_filepath: The path to the TDMS file to read.
+        group_names: A list of group names to read data from.
+        channel_names: A list of channel names to read data from.
 
     Returns:
-        tdms_data (list): Containing DataFrames, each being the channel data
-        test_info (DataFrame): Contains basic info including Test ID's, times and SN
+        A list of pandas DataFrames containing the time and channel data for the specified channels.
 
+    Raises:
+        Exception: If there is an error opening or reading from the TDMS file.
     """
     tdms_data = []
     try:
@@ -158,8 +190,8 @@ def get_time_series_data(tdms_filepath, group_names: list[Any], channel_names: l
                 d = {(channel_name + "_Time"): time_data, channel_name: channel_data}
                 df = pd.DataFrame(data=d)
                 tdms_data.append(df)
-    except:
-        print("WARNING: check QNAP connection")
+    except Exception:
+        print("WARNING: Error Looking for Time Channel")
         print(sys.exc_info())
     return tdms_data
 
