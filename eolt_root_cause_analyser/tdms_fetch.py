@@ -175,8 +175,6 @@ def get_time_series_data(tdms_filepath, group_names: list[Any], channel_names: l
     Returns:
         A list of pandas DataFrames containing the time and channel data for the specified channels.
 
-    Raises:
-        Exception: If there is an error opening or reading from the TDMS file.
     """
     tdms_data = []
     try:

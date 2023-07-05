@@ -10,10 +10,10 @@ def logic(failure_code, test_id, test_type_id):
     eol_test_id = fetch_eol(test_id, test_type_id)
     tdmsname = form_filename_tdms(test_id, test_type_id, eol_test_id)
     tdms_filepath = form_filepath(tdmsname)
-    df = read_tdms(tdms_filepath)
+    # df = read_tdms(tdms_filepath)
     # print(df)
     # initial_plots(df)
     return 0
 
 
-logic(20070, 20140, "High_Speed")
+# logic(20070, 20140, "High_Speed")
