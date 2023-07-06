@@ -1,7 +1,9 @@
 """Test cases for the __main__ module."""
+import sys
 from pathlib import Path
 from unittest import mock
 from unittest.mock import MagicMock
+from unittest.mock import patch
 
 import click.testing
 import eolt_root_cause_analyser.cli as cli
@@ -87,15 +89,10 @@ def test_form_filename_tdms():
 
 
 def test_form_filepath():
-    # Test with a sample filename
-    filename = "test.tdms"
-    expected_path = Path(rf"C:\Users\Vadan.Khan\Documents\Project\Sample TDMS files\{filename}")
-    assert form_filepath(filename) == expected_path
-
-    # Test with an empty filename
-    filename = ""
-    expected_path = Path(rf"C:\Users\Vadan.Khan\Documents\Project\Sample TDMS files\{filename}")
-    assert form_filepath(filename) == expected_path
+    with patch.object(sys.modules[__name__], "__file__", "C:/Users/Vadan.Khan/Documents/Project/test/form_filepath.py"):
+        result = form_filepath("test.tdms")
+        expected = Path("C:/Users/Vadan.Khan/Documents/Project/Sample TDMS files/test.tdms")
+        assert result == expected
 
 
 # def test_read_tdms(monkeypatch):

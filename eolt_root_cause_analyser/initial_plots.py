@@ -34,8 +34,12 @@ print(f"{df}\n")
 columns = list(df.columns)
 print(columns)
 
-SinP = RPS_time_list[0]
-print(SinP)
+# SinP = RPS_time_list[0]
+# SinN = RPS_time_list[1]
+# CosP = RPS_time_list[2]
+# CosN = RPS_time_list[3]
+# print(SinP)
+# Sin
 # SinP.plot("SinP_Time", y=["SinP"])
 
 # sinN = df["AI DAQ - High Speed Inc RTD/SinN"]

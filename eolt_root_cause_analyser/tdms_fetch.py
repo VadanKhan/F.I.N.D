@@ -122,8 +122,26 @@ def form_filepath(filename):
     Returns:
         A Path object representing the full path to the TDMS file.
     """
+    # Get the parent directory of the script file
+    parent_dir = Path(__file__).parent
 
-    tdms_file_path = Path(rf"C:\Users\Vadan.Khan\Documents\Project\Sample TDMS files\{filename}")
+    # Get up two levels in the parent directory
+    two_levels_up = parent_dir.parents[1]
+
+    # Define the relative path to the target file
+    relative_path = rf"Sample TDMS files\{filename}"
+
+    # Join the parent directory with the relative path
+    tdms_file_path = two_levels_up / relative_path
+
+    # Check if the target directory exists
+    if tdms_file_path.exists():
+        print(f"Target directory found: {tdms_file_path}")
+    else:
+        print("Target directory not found")
+
+    # tdms_file_path = Path(rf"C:\Users\Vadan.Khan\Documents\Project\Sample TDMS files\{filename}")
+
     return tdms_file_path
 
 

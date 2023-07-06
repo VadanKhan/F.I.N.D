@@ -41,9 +41,3 @@ def fetch_eol(test_id, test_type_id):
 
     connection.close()
     return eol_test_id_value
-
-
-# dummy_test_id = 393
-# dummy_test_type = "High_Speed"
-# dummy_eol_test_id = fetch(dummy_test_id, dummy_test_type)
-# print(dummy_eol_test_id)
