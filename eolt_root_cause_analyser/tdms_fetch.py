@@ -105,7 +105,9 @@ def form_filename_tdms(test_id, test_type_id, eol_test_id):
         str: The formed filename for the TDMS file.
     """
     filename = f"{eol_test_id}_{test_type_id}_{test_id}.tdms"
-    print(f"Looking for: {filename}\n")
+    print("=" * 120)
+    print(f"Looking for: {filename}")
+    print("=" * 120, "\n")
     return filename
 
 
@@ -136,9 +138,13 @@ def form_filepath(filename):
 
     # Check if the target directory exists
     if tdms_file_path.exists():
+        print("=" * 120)
         print(f"Target directory found: {tdms_file_path}")
+        print("=" * 120, "\n")
     else:
+        print("=" * 120)
         print("Target directory not found")
+        print("=" * 120, "\n")
 
     # tdms_file_path = Path(rf"C:\Users\Vadan.Khan\Documents\Project\Sample TDMS files\{filename}")
 
@@ -159,7 +165,7 @@ def read_tdms(tdms_file_path):
     Returns:
         A pandas DataFrame containing the data from the TDMS file.
     """
-
+    print("_" * 60, "Reading TDMS", "_" * 60)
     tdms_file = TdmsFile.read(tdms_file_path)
 
     # Converting TDMS data to a pandas DataFrame
@@ -184,6 +190,7 @@ def get_time_series_data(tdms_filepath, group_names: list[Any], channel_names: l
     This function takes the path to a TDMS file, a list of group names, and a list of channel names as arguments.
         It opens the TDMS file and reads the data for the specified groups and channels. The data is returned as a list
         of pandas DataFrames, where each DataFrame contains the time and channel data for one of the specified channels.
+        NB: for each channel, you must specify its corresponding group in the group_names list.
 
     Args:
         tdms_filepath: The path to the TDMS file to read.
@@ -203,7 +210,7 @@ def get_time_series_data(tdms_filepath, group_names: list[Any], channel_names: l
                 channel = group[channel_name]  # Specifies the channel to look at
                 time_data = channel.time_track()  # Gets the time values for the channel
                 channel_data = channel[:]  # Gets raw data from the channel into an array
-                d = {(channel_name + "_Time"): time_data, channel_name: channel_data}
+                d = {(channel_name + "_time"): time_data, channel_name: channel_data}
                 df = pd.DataFrame(data=d)
                 tdms_data.append(df)
     except Exception:
