@@ -107,6 +107,13 @@ def rps_prefilter(df_filepath, df_test, eol_test_id):
 
 
 def rps_signal_zero_checker(rps_data: np.ndarray):
+    """
+    This function checks for zero signals in the given RPS data.
+
+    :param rps_data: A numpy array containing RPS data.
+    :return: A list of strings indicating the status of each sensor. "Zero Signal" if the RMS value is less than or
+        equal to 0.1, otherwise 0.
+    """
     print("_" * 60, "zero signal checker", "_" * 60)
     rms_values = []
     for i in range(4):
@@ -120,6 +127,12 @@ def rps_signal_zero_checker(rps_data: np.ndarray):
             rps_signal_sensor_status.append(0)
     print("=" * 120, "\n")
     return rps_signal_sensor_status
+
+
+def rps_signal_static_checker(rps_data: np.ndarray):
+    print("_" * 60, "static signal checker", "_" * 60)
+    print("=" * 120, "\n")
+    return 0
 
 
 # %% Toplevel Runner
