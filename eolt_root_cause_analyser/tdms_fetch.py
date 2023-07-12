@@ -183,18 +183,17 @@ def read_tdms(tdms_file_path):
     return tdms_df
 
 
-def get_time_series_data(tdms_filepath, group_names: list[Any], channel_names: list[Any]) -> list[pd.DataFrame]:
+def get_time_series_data(tdms_filepath, channel_names: list[str]) -> list[pd.DataFrame]:
     """
-    Reads data from a TDMS file and returns it as a list of pandas DataFrames.
+    Reads data from a TDMS file and the wanted channels as a list of pandas DataFrames.
 
-    This function takes the path to a TDMS file, a list of group names, and a list of channel names as arguments.
-        It opens the TDMS file and reads the data for the specified groups and channels. The data is returned as a list
-        of pandas DataFrames, where each DataFrame contains the time and channel data for one of the specified channels.
-        NB: for each channel, you must specify its corresponding group in the group_names list.
+    This function takes the path to a TDMS file and a list of channel names as arguments.
+    It opens the TDMS file and reads the data for the specified channels, searching in each group for the channel names.
+    It returns a list ofof pandas DataFrames, where each DataFrame contains the time and channel data for one of the
+    specified channels.
 
     Args:
         tdms_filepath: The path to the TDMS file to read.
-        group_names: A list of group names to read data from.
         channel_names: A list of channel names to read data from.
 
     Returns:
@@ -204,42 +203,25 @@ def get_time_series_data(tdms_filepath, group_names: list[Any], channel_names: l
     tdms_data = []
     try:
         with TdmsFile.open(tdms_filepath) as tdms_file:
-            for count, group in enumerate(group_names):
-                group = tdms_file[group]  # Specifies the group to look at
-                channel_name = channel_names[count]
-                channel = group[channel_name]  # Specifies the channel to look at
-                time_data = channel.time_track()  # Gets the time values for the channel
-                channel_data = channel[:]  # Gets raw data from the channel into an array
-                d = {(channel_name + "_time"): time_data, channel_name: channel_data}
-                df = pd.DataFrame(data=d)
-                tdms_data.append(df)
+            for channel_name in channel_names:
+                print("Searching for Channel: ", channel_name)
+                for group_name in tdms_file.groups():
+                    group_name = str(group_name)  # converts to string
+                    group_name = group_name.split("'")[1]  # trims to only extract the name between ''
+                    group = tdms_file[group_name]
+                    if channel_name in group:
+                        print(f"Channel '{channel_name}' found in group '{group_name}'\n")
+                        channel = group[channel_name]  # Specifies the channel to look at
+                        time_data = channel.time_track()  # Gets the time values for the channel
+                        channel_data = channel[:]  # Gets raw data from the channel into an array
+                        d = {(channel_name + "_time"): time_data, channel_name: channel_data}
+                        df = pd.DataFrame(data=d)
+                        tdms_data.append(df)
+                        break
+                else:
+                    print(f"Channel '{channel}' not found in any group\n")
+
     except Exception:
         print("WARNING: Error Looking for Time Channel")
         print(sys.exc_info())
     return tdms_data
-
-
-# def read_tdms(filename):
-#     """Reads a EOL TDMS file and returns its contents as a Pandas DataFrame.
-#     NOTE: THIS STEP HAS A LARGE RUNTIME ~20 SECONDS if connecting to QNAP
-
-#     Args:
-#         filename (str): The name of the TDMS file to read.
-
-#     Returns:
-#         DataFrame: A Pandas DataFrame containing the data from the TDMS file.
-#     """
-#     try:
-#         df = yasa_file_io.tdms.read_tdms_as_dataframe(
-#             Path(rf"C:\Users\Vadan.Khan\Documents\Project\Sample TDMS files\{filename}"),
-#             channel_map={},
-#             extract_all=True,
-#             fuzzy_matching=True,
-#             drop_duplicates=False,
-#             fuzzy_match_score=50.0,
-#             search_terms_as_keys=False,
-#         )
-#         return df
-#     except Exception:
-#         warnings.warn("Accessing TDMS Failed", UserWarning)
-#         return None

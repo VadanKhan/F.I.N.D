@@ -8,10 +8,10 @@ from tdms_fetch import get_time_series_data
 from tdms_fetch import read_tdms
 
 # %% Testing Required inputs
-test_id_V = 20140
-test_type_id_V = "High_Speed"
-eol_test_id_V = 23918
-df_filepath_V = form_filepath("23918_High_Speed_20140.tdms")
+test_id_V = 32537
+test_type_id_V = "Cogging"
+eol_test_id_V = 33931
+df_filepath_V = form_filepath("33931_Cogging_32537.tdms")
 df_test_V = read_tdms(df_filepath_V)
 
 # %%
@@ -71,39 +71,46 @@ def rps_prefilter(df_filepath, df_test, eol_test_id):
         np.ndarray: A NumPy array containing the filtered RPS data.
     """
     print("_" * 60, "RPS prefilter", "_" * 60)
-    rps_group_list = ["AI DAQ - High Speed Inc RTD"] * 4
     rps_channel_list = ["SinP", "SinN", "CosP", "CosN"]
-    rps_time_list = get_time_series_data(df_filepath, rps_group_list, rps_channel_list)
     print("_" * 60, "Get RPS time values & convert to numpy", "_" * 60)
-    # print(f"{rps_time_list[0]}")
-    SinP_df = rps_time_list[0]
-    SinN_df = rps_time_list[1]
-    CosP_df = rps_time_list[2]
-    CosN_df = rps_time_list[3]
-    time = SinP_df.SinP_time
-    time.name = "RPS_time"
-    SinP_timevals_pd = SinP_df.SinP
-    SinN_timevals_pd = SinN_df.SinN
-    CosP_timevals_pd = CosP_df.CosP
-    CosN_timevals_pd = CosN_df.CosN
-    RPS_df = pd.concat([time, SinP_timevals_pd, SinN_timevals_pd, CosP_timevals_pd, CosN_timevals_pd], axis=1)
-    print(f"{RPS_df}\n")
-    rps_data_raw_np: np.ndarray = RPS_df.values
-    print(f"As a numpy array:\n{rps_data_raw_np}\n")
-    print("=" * 120, "\n")
+    rps_time_list = get_time_series_data(df_filepath, rps_channel_list)
 
-    time_np = rps_data_raw_np[:, 0]
+    print(f"{rps_time_list[0]}")
+    # SinP_df = rps_time_list[0]
+    # SinN_df = rps_time_list[1]
+    # CosP_df = rps_time_list[2]
+    # CosN_df = rps_time_list[3]
+    # time = SinP_df.SinP_time
+    # time.name = "RPS_time"
+    # SinP_timevals_pd = SinP_df.SinP
+    # SinN_timevals_pd = SinN_df.SinN
+    # CosP_timevals_pd = CosP_df.CosP
+    # CosN_timevals_pd = CosN_df.CosN
+    # RPS_df = pd.concat([time, SinP_timevals_pd, SinN_timevals_pd, CosP_timevals_pd, CosN_timevals_pd], axis=1)
+    # print(f"{RPS_df}\n")
+    # rps_data_raw_np: np.ndarray = RPS_df.values
+    # print(f"As a numpy array:\n{rps_data_raw_np}\n")
+    # print("=" * 120, "\n")
 
-    print("_" * 60, "fetch test details", "_" * 60)
-    motor_type = fetch_motor_details(eol_test_id)
-    step_details_df: pd.DataFrame = fetch_step_timings(motor_type)
-    print("=" * 120, "\n")
+    # time_np = rps_data_raw_np[:, 0]
 
-    filtered_index_array = edge_filtering(step_details_df, time_np)
-    rps_data_np = rps_data_raw_np[filtered_index_array]
-    print(rps_data_np)
-    print("=" * 120, "\n")
-    return rps_data_np
+    # print("_" * 60, "fetch test details", "_" * 60)
+    # motor_type = fetch_motor_details(eol_test_id)
+    # step_details_df: pd.DataFrame = fetch_step_timings(motor_type)
+    # print("=" * 120, "\n")
+
+    # filtered_index_array = edge_filtering(step_details_df, time_np)
+    # rps_data_np = rps_data_raw_np[filtered_index_array]
+    # print(rps_data_np)
+
+    # fig, (ax1, ax2) = plt.subplots(2, 1)
+    # ax1.plot(rps_data_raw_np[:, 0], rps_data_raw_np[:, 1])
+    # ax2.plot(rps_data_np[:, 0], rps_data_np[:, 1])
+    # plt.show()
+
+    # print("=" * 120, "\n")
+
+    return 0
 
 
 def rps_signal_zero_checker(rps_data: np.ndarray):
@@ -137,4 +144,17 @@ def rps_signal_static_checker(rps_data: np.ndarray):
 
 # %% Toplevel Runner
 rps_data_np = rps_prefilter(df_filepath_V, df_test_V, eol_test_id_V)
-rps_zero_status = rps_signal_zero_checker(rps_data_np)
+# rps_zero_status = rps_signal_zero_checker(rps_data_np)
+
+# from nptdms import TdmsFile
+
+# df_filepath_try = form_filepath("33931_Cogging_32537.tdms")
+# tdms_file = TdmsFile.read(df_filepath_try)
+# group_names = tdms_file.groups()
+
+# for group_name in group_names:
+#     print(group_name)
+#     group_name = str(group_name)
+#     print(group_name)
+#     substring = group_name.split("'")[1]
+#     print(substring)
