@@ -93,7 +93,7 @@ def _apply_channel_map(
     return tdms_file
 
 
-def form_filename_tdms(test_id, test_type_id, eol_test_id):
+def form_filename_tdms(eol_test_id, test_type_id, test_id):
     """Forms a filename for the EOL TDMS files using the given test_id, test_type_id, and eol_test_id.
 
     Args:
@@ -214,7 +214,10 @@ def get_time_series_data(tdms_filepath, channel_names: list[str]) -> list[pd.Dat
                         channel = group[channel_name]  # Specifies the channel to look at
                         time_data = channel.time_track()  # Gets the time values for the channel
                         channel_data = channel[:]  # Gets raw data from the channel into an array
-                        d = {(channel_name + "_time"): time_data, channel_name: channel_data}
+                        d = {
+                            (channel_name + "_time"): time_data,
+                            channel_name: channel_data,
+                        }
                         df = pd.DataFrame(data=d)
                         tdms_data.append(df)
                         break
