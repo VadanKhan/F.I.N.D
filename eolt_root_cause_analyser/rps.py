@@ -11,10 +11,11 @@ from tdms_fetch import read_tdms
 # %% Testing Required inputs
 good_rps_test = [23918, "High_Speed", 20140]
 static_rps_test = [33931, "Cogging", 32537]
+order_rps_test = [36288, "High_Speed", 31105]
 
-eol_test_id_V = static_rps_test[0]
-test_type_id_V = static_rps_test[1]
-test_id_V = static_rps_test[2]
+eol_test_id_V = good_rps_test[0]
+test_type_id_V = good_rps_test[1]
+test_id_V = good_rps_test[2]
 
 filename_V = form_filename_tdms(eol_test_id_V, test_type_id_V, test_id_V)
 df_filepath_V = form_filepath(filename_V)
@@ -137,16 +138,16 @@ def rps_prefilter(df_filepath, df_test, eol_test_id):
     # ax2.plot(rps_data_np[:, 0], rps_data_np[:, 4])
     # fig4.suptitle("CosN: Before / After prefilter")
 
-    fig8, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1)
-    ax1.plot(rps_data_np[:, 0], rps_data_np[:, 1])
-    ax2.plot(rps_data_np[:, 0], rps_data_np[:, 2])
-    ax3.plot(rps_data_np[:, 0], rps_data_np[:, 3])
-    ax4.plot(rps_data_np[:, 0], rps_data_np[:, 4])
-    ax1.set_ylim(0, 5)
-    ax2.set_ylim(0, 5)
-    ax3.set_ylim(0, 5)
-    ax4.set_ylim(0, 5)
-    fig8.suptitle("Input (Selected) Signals")
+    # fig8, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1)
+    # ax1.plot(rps_data_np[:, 0], rps_data_np[:, 1])
+    # ax2.plot(rps_data_np[:, 0], rps_data_np[:, 2])
+    # ax3.plot(rps_data_np[:, 0], rps_data_np[:, 3])
+    # ax4.plot(rps_data_np[:, 0], rps_data_np[:, 4])
+    # ax1.set_ylim(0, 5)
+    # ax2.set_ylim(0, 5)
+    # ax3.set_ylim(0, 5)
+    # ax4.set_ylim(0, 5)
+    # fig8.suptitle("Input (Selected) Signals")
 
     print("=" * 120, "\n")
 
@@ -384,20 +385,60 @@ def rps_signal_static_checker(rps_data: np.ndarray):
     return overall_results, average_status, differential_status, non_normal_times, differential_rms_values
 
 
+def rps_order_checker(rps_data: np.ndarray):
+    print("_" * 60, "order checker", "_" * 60)
+    sinP = rps_data[:, 1]
+    sinN = rps_data[:, 2]
+    cosP = rps_data[:, 3]
+    cosN = rps_data[:, 4]
+    sinP_mean = np.mean(sinP)
+    sinN_mean = np.mean(sinN)
+    cosP_mean = np.mean(cosP)
+    cosN_mean = np.mean(cosN)
+    print(f"SinP mean: {sinP_mean}")
+    print(f"SinN mean: {sinN_mean}")
+    print(f"CosP mean: {cosP_mean}")
+    print(f"CosN mean: {cosN_mean}")
+
+    sin_check = (sinP - sinP_mean) + (sinN - sinN_mean)
+    cos_check = (cosP - cosP_mean) + (cosN - cosN_mean)
+    print(f"Sin Check Mean: {np.mean(sin_check)}")
+    print(f"Cos Check Mean: {np.mean(cos_check)}")
+
+    fig9, (ax1, ax2) = plt.subplots(2, 1)
+    ax1.plot(rps_data[:, 0], sin_check)
+    ax2.plot(rps_data[:, 0], cos_check)
+    # ax1.set_ylim(-5, 5)
+    # ax2.set_ylim(-5, 5)
+    ax1.set_title("sinP+sinN")
+    ax2.set_title("cosP+cosN")
+
+    fig10, ax1 = plt.subplots()
+    ax1.plot(rps_data[:, 0], sinP, label="sinP")
+    ax1.plot(rps_data[:, 0], sinN, label="sinN")
+    ax1.plot(rps_data[:, 0], cosP, label="cosP")
+    ax1.plot(rps_data[:, 0], cosN, label="cosN")
+    ax1.set_xlim(20, 20.01)
+    ax1.legend()
+    print("=" * 120, "\n")
+    return 0
+
+
 # %% Toplevel Runner
 if __name__ == "__main__":
     rps_data_np_V = rps_prefilter(df_filepath_V, df_test_V, eol_test_id_V)
-    rps_zero_status = rps_signal_zero_checker(rps_data_np_V)
-    rps_short_status = rps_signal_5V_checker(rps_data_np_V)
-    rps_static_status = rps_signal_static_checker(rps_data_np_V)
+    # rps_zero_status = rps_signal_zero_checker(rps_data_np_V)
+    # rps_short_status = rps_signal_5V_checker(rps_data_np_V)
+    # rps_static_status = rps_signal_static_checker(rps_data_np_V)
+    rps_order_status = rps_order_checker(rps_data_np_V)
 
     print("_" * 60, "Results", "_" * 60)
     # print(rps_zero_status)
     # print(rps_short_status)
-    print(f"Overall Results: {rps_static_status[0]}")
-    print(f"Average Status: {rps_static_status[1]}")
-    print(f"Differential Status: {rps_static_status[2]}")
-    print(f"Non Normal Times: {rps_static_status[3]}")
-    print(f"Differential RMS values: {rps_static_status[4]}")
+    # print(f"Overall Results: {rps_static_status[0]}")
+    # print(f"Average Status: {rps_static_status[1]}")
+    # print(f"Differential Status: {rps_static_status[2]}")
+    # print(f"Non Normal Times: {rps_static_status[3]}")
+    # print(f"Differential RMS values: {rps_static_status[4]}")
     print("=" * 120, "\n")
     plt.show()
