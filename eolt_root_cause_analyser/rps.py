@@ -574,7 +574,6 @@ if __name__ == "__main__":
     # rps_short_status = rps_signal_5V_checker(rps_data_np_V)
     # rps_static_status = rps_signal_static_checker(rps_data_np_V)
     rps_order_status = rps_order_checker(rps_data_np_V)
-
     print("_" * 60, "Results", "_" * 60)
     # print(rps_zero_status)
     # print(rps_short_status)
