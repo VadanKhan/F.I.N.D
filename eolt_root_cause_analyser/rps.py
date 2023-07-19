@@ -1,6 +1,9 @@
+import itertools
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy.optimize import curve_fit
 from sql_fetch import fetch_motor_details
 from sql_fetch import fetch_step_timings
 from tdms_fetch import form_filename_tdms
@@ -11,7 +14,7 @@ from tdms_fetch import read_tdms
 # %% Testing Required inputs
 good_rps_test = [23918, "High_Speed", 20140]
 static_rps_test = [33931, "Cogging", 32537]
-order_rps_test = [36288, "High_Speed", 31105]
+order_uvw_test = [36288, "High_Speed", 31105]
 
 eol_test_id_V = good_rps_test[0]
 test_type_id_V = good_rps_test[1]
@@ -38,6 +41,7 @@ AVERAGING_SPREAD = 500
 NORMAL_AVERAGE_LOW = 2.4
 NORMAL_AVERAGE_HIGH = 2.6
 DIFFERENTIAL_RMS_LOW = 0.05
+OUT_OF_PHASE_SQUARE_ERROR_LOW = 0.5
 
 
 # %%
@@ -138,16 +142,22 @@ def rps_prefilter(df_filepath, df_test, eol_test_id):
     # ax2.plot(rps_data_np[:, 0], rps_data_np[:, 4])
     # fig4.suptitle("CosN: Before / After prefilter")
 
-    # fig8, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1)
-    # ax1.plot(rps_data_np[:, 0], rps_data_np[:, 1])
-    # ax2.plot(rps_data_np[:, 0], rps_data_np[:, 2])
-    # ax3.plot(rps_data_np[:, 0], rps_data_np[:, 3])
-    # ax4.plot(rps_data_np[:, 0], rps_data_np[:, 4])
-    # ax1.set_ylim(0, 5)
-    # ax2.set_ylim(0, 5)
-    # ax3.set_ylim(0, 5)
-    # ax4.set_ylim(0, 5)
-    # fig8.suptitle("Input (Selected) Signals")
+    fig8, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1)
+    ax1.plot(rps_data_np[:, 0], rps_data_np[:, 1])
+    ax2.plot(rps_data_np[:, 0], rps_data_np[:, 2])
+    ax3.plot(rps_data_np[:, 0], rps_data_np[:, 3])
+    ax4.plot(rps_data_np[:, 0], rps_data_np[:, 4])
+    ax5.plot(rps_data_np[:, 0], rps_data_np[:, 1], label="SinP")
+    ax5.plot(rps_data_np[:, 0], rps_data_np[:, 2], label="SinN")
+    ax5.plot(rps_data_np[:, 0], rps_data_np[:, 3], label="CosP")
+    ax5.plot(rps_data_np[:, 0], rps_data_np[:, 4], label="CosN")
+    ax1.set_ylim(0, 5)
+    ax2.set_ylim(0, 5)
+    ax3.set_ylim(0, 5)
+    ax4.set_ylim(0, 5)
+    ax5.set_ylim(0, 5)
+    ax5.legend()
+    fig8.suptitle("Input (Selected) Signals")
 
     print("=" * 120, "\n")
 
@@ -212,53 +222,6 @@ def moving_average_convolve(data: np.ndarray, spread: int):
     kernel = np.ones(spread) / spread
     averaged_data = np.convolve(data, kernel, mode="same")
     return averaged_data
-
-
-# def moving_average_fast(data, spread):
-#     cumsum = np.cumsum(data)
-#     avg_vals = np.empty(len(data))
-#     for i in range(len(data)):
-#         if i >= spread:
-#             avg_vals[i] = (cumsum[i] - cumsum[i - spread]) / spread
-#         else:
-#             avg_vals[i] = cumsum[i] / (i + 1)
-#         # print(len(avg_vals))
-#     return avg_vals
-
-
-# def worker(data, start, end, spread):
-#     cumsum = np.cumsum(data[start:end])
-#     avg_vals = np.empty(end - start)
-#     for i in range(start, end):
-#         if i >= spread:
-#             avg_vals[i - start] = (cumsum[i - start] - cumsum[i - start - spread]) / spread
-#         else:
-#             avg_vals[i - start] = cumsum[i - start] / (i + 1)
-#     return avg_vals
-
-
-# def moving_average_parallel(data, spread):
-#     n_workers = 4
-#     chunk_size = len(data) // n_workers
-#     with ProcessPoolExecutor() as executor:
-#         results = executor.map(
-#             worker,
-#             [data] * n_workers,
-#             range(0, len(data), chunk_size),
-#             range(chunk_size, len(data) + chunk_size, chunk_size),
-#             [spread] * n_workers,
-#         )
-#     return np.concatenate(list(results))
-
-
-# def frequency_filtering(data: np.ndarray):
-#     fft_data = np.fft.fft(data)
-#     freqs = np.fft.fftfreq(len(data))
-#     fig7 = plt.figure()
-#     plt.stem(range(len(fft_data)), np.abs(fft_data))
-#     plt.xlabel("Frequency (cycles/sample)")
-#     plt.ylabel("Magnitude")
-#     return fft_data
 
 
 def remove_centre_data(time, eol_test_id, gap_width):
@@ -385,43 +348,223 @@ def rps_signal_static_checker(rps_data: np.ndarray):
     return overall_results, average_status, differential_status, non_normal_times, differential_rms_values
 
 
+def normalise_signal(signal):
+    """Normalizes a given signal so that its values fall between -1 and 1.
+
+    This function takes a signal as input, calculates its minimum and maximum values, and uses them to rescale the
+        signal so that its values fall between 0 and 1. The rescaled signal is then transformed to have values between
+        -1 and 1 by multiplying it by 2 and subtracting 1.
+
+    Args:
+        signal (array_like): The input signal to be normalized.
+
+    Returns:
+        array_like: The normalized version of the input signal with values between -1 and 1.
+    """
+    min_val = np.min(signal)
+    max_val = np.max(signal)
+    return (signal - min_val) / (max_val - min_val)
+
+
+def calculate_frequencies(time, signals):
+    """
+    Calculates the frequency of each signal in the given data.
+
+    This function takes a 1D numpy array of time values and a 2D numpy array of signals as input, where each column of
+    the signals array represents a different signal, and returns a list containing the frequency of each signal.
+
+    Parameters
+    ----------
+    time : array_like
+        The time values of the input data.
+    signals : array_like
+        The input signals, where each column represents a different signal.
+
+    Returns
+    -------
+    list
+        A list containing the frequency of each signal.
+    """
+
+    # Calculate FFT of each signal
+    fft_values = np.fft.fft(signals, axis=0)
+
+    # Calculate power spectrum of each signal
+    L = signals.shape[0]
+    P2 = np.abs(fft_values / L)
+    P1 = P2[: L // 2 + 1]
+    P1[1:-1] = 2 * P1[1:-1]
+
+    # Ignore 0 Hz frequency component
+    P1[0] = 0
+
+    # Find index of peak frequency for each signal
+    peak_indices = np.argmax(P1, axis=0)
+
+    # Calculate frequency values
+    Fs = 1 / np.mean(np.diff(time))  # Sampling frequency
+    f_values = Fs * np.arange(L // 2 + 1) / L
+
+    fig13, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1)
+    ax1.bar(f_values, P1[:, 0], width=10)
+    ax2.bar(f_values, P1[:, 1], width=10)
+    ax3.bar(f_values, P1[:, 2], width=10)
+    ax4.bar(f_values, P1[:, 3], width=10)
+
+    # Calculate frequency of each signal
+    frequencies = f_values[peak_indices]
+
+    return frequencies
+
+
+def align_signals(time, main_signal, move_signal, period, expected_phase_shift, sampling_time):
+    """
+    Aligns two given signals and calculates their average absolute difference. IT EXPECTS THE PHASE SHIFT IN UNITS OF 1
+        (eg. if signals differ in phase by pi/2, input 0.25)
+
+    This function takes a 1D numpy array of time values, two 1D numpy arrays representing the two input signals,
+    the period of the signals, and the expected phase shift between them as input. It returns the aligned portions
+    of the two signals and their average absolute difference.
+
+    Parameters
+    ----------
+    time : array_like
+        The time values of the input data.
+    main_signal : array_like
+        The first input signal.
+    move_signal : array_like
+        The second input signal.
+    period : float
+        The period of the signals.
+    expected_phase_shift : float
+        The expected phase shift between the two signals.
+
+    Returns
+    -------
+    tuple
+        A tuple containing three elements: the aligned portion of the first signal, the aligned portion of the
+        second signal, and their average absolute difference.
+    """
+
+    # Shift second signal to overlap with first signal
+    time_shift = round((expected_phase_shift * period) / sampling_time)
+    shifted_signal = np.roll(move_signal, time_shift)
+
+    # Calculate average absolute difference between shifted signals, ignoring rolled values
+    avg_abs_diff = np.mean((main_signal[time_shift:] - shifted_signal[time_shift:]) ** 2)
+
+    return main_signal[time_shift:], shifted_signal[time_shift:], avg_abs_diff
+
+
+def correct_order_checker(signal_list, time, period, sampling_time):
+    sinP = signal_list[0]
+    cosP = signal_list[1]
+    sinN = signal_list[2]
+    cosN = signal_list[3]
+
+    # check sinP shifts correctly
+    sinp_sinp = np.array([0, 0, 0])
+    sinp_cosp = align_signals(time, cosP, sinP, period, 0.25, sampling_time)
+    sinp_sinn = align_signals(time, sinN, sinP, period, 0.5, sampling_time)
+    sinp_cosn = align_signals(time, cosN, sinP, period, 0.75, sampling_time)
+    sinp_start_line = np.array([sinp_sinp[2], sinp_cosp[2], sinp_sinn[2], sinp_cosn[2]])
+    print("sinP aligning check: ", sinp_start_line)
+
+    # check cosp shifts correctly
+    cosp_sinp = align_signals(time, sinP, cosP, period, 0.75, sampling_time)
+    cosp_cosp = np.array([0, 0, 0])
+    cosp_sinn = align_signals(time, sinN, cosP, period, 0.25, sampling_time)
+    cosp_cosn = align_signals(time, cosN, cosP, period, 0.5, sampling_time)
+    cosp_start_line = np.array([cosp_sinp[2], cosp_cosp[2], cosp_sinn[2], cosp_cosn[2]])
+    print("cosp aligning check: ", cosp_start_line)
+
+    # check sinn shifts correctly
+    sinn_sinp = align_signals(time, sinP, sinN, period, 0.5, sampling_time)
+    sinn_cosp = align_signals(time, cosP, sinN, period, 0.75, sampling_time)
+    sinn_sinn = np.array([0, 0, 0])
+    sinn_cosn = align_signals(time, cosN, sinN, period, 0.25, sampling_time)
+    sinn_start_line = np.array([sinn_sinp[2], sinn_cosp[2], sinn_sinn[2], sinn_cosn[2]])
+    print("sinn aligning check: ", sinn_start_line)
+
+    # check cosnn shifts correctly
+    cosn_sinp = align_signals(time, sinP, cosN, period, 0.25, sampling_time)
+    cosn_cosp = align_signals(time, cosP, cosN, period, 0.5, sampling_time)
+    cosn_sinn = align_signals(time, sinN, cosN, period, 0.75, sampling_time)
+    cosn_cosn = np.array([0, 0, 0])
+    cosn_start_line = np.array([cosn_sinp[2], cosn_cosp[2], cosn_sinn[2], cosn_cosn[2]])
+    print("cosn aligning check: ", cosn_start_line)
+
+    alignment_matrix = np.vstack((sinp_start_line, cosp_start_line, sinn_start_line, cosn_start_line))
+    alignment_matrix = np.where(alignment_matrix > 0.5, 1, 0)
+    print("\nAlignment Matrix:\n", alignment_matrix)
+
+    if np.all(alignment_matrix == 0):
+        return True
+    else:
+        return False
+
+
 def rps_order_checker(rps_data: np.ndarray):
     print("_" * 60, "order checker", "_" * 60)
-    sinP = rps_data[:, 1]
-    sinN = rps_data[:, 2]
-    cosP = rps_data[:, 3]
-    cosN = rps_data[:, 4]
-    sinP_mean = np.mean(sinP)
-    sinN_mean = np.mean(sinN)
-    cosP_mean = np.mean(cosP)
-    cosN_mean = np.mean(cosN)
-    print(f"SinP mean: {sinP_mean}")
-    print(f"SinN mean: {sinN_mean}")
-    print(f"CosP mean: {cosP_mean}")
-    print(f"CosN mean: {cosN_mean}")
+    time = rps_data[100000:100100, 0]  #  np.linspace(25, 25.01, 100)
+    sampling_time = np.mean(np.diff(time))
+    sampling_freq = 1 / sampling_time  # Sampling frequency
+    sinP = rps_data[100000:100100, 1]  # sinP
+    cosP = rps_data[100000:100100, 3]  # cosP
+    sinN = rps_data[100000:100100, 2]  # sinN
+    cosN = rps_data[100000:100100, 4]  # cosN
+    signals_list = [sinP, cosP, sinN, cosN]
+    sinP = signals_list[0]
+    cosP = signals_list[1]
+    sinN = signals_list[2]
+    cosN = signals_list[3]
+    signals_list = [sinP, cosP, sinN, cosN]
+    signal_names = ["sinP", "cosP", "sinN", "cosN"]
+    signals = np.column_stack((sinP, sinN, cosP, cosN))
 
-    sin_check = (sinP - sinP_mean) + (sinN - sinN_mean)
-    cos_check = (cosP - cosP_mean) + (cosN - cosN_mean)
-    print(f"Sin Check Mean: {np.mean(sin_check)}")
-    print(f"Cos Check Mean: {np.mean(cos_check)}")
+    fig12, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1)
+    ax1.plot(time, sinP)
+    ax2.plot(time, cosP)
+    ax3.plot(time, sinN)
+    ax4.plot(time, cosN)
+    ax5.plot(time, sinP, label="SinP")
+    ax5.plot(time, cosP, label="CosP")
+    ax5.plot(time, sinN, label="SinN")
+    ax5.plot(time, cosN, label="CosN")
+    plt.legend()
 
-    fig9, (ax1, ax2) = plt.subplots(2, 1)
-    ax1.plot(rps_data[:, 0], sin_check)
-    ax2.plot(rps_data[:, 0], cos_check)
-    # ax1.set_ylim(-5, 5)
-    # ax2.set_ylim(-5, 5)
-    ax1.set_title("sinP+sinN")
-    ax2.set_title("cosP+cosN")
+    frequencies = calculate_frequencies(time, signals)
+    T = 1 / np.mean(frequencies)
 
-    fig10, ax1 = plt.subplots()
-    ax1.plot(rps_data[:, 0], sinP, label="sinP")
-    ax1.plot(rps_data[:, 0], sinN, label="sinN")
-    ax1.plot(rps_data[:, 0], cosP, label="cosP")
-    ax1.plot(rps_data[:, 0], cosN, label="cosN")
-    ax1.set_xlim(20, 20.01)
-    ax1.legend()
+    print(f"The frequencies of the signals are {frequencies}, period: {T}")
+
+    main_signal, shifted_signal, error = align_signals(time, cosN, cosP, T, 0.5, sampling_time)
+    print("\nPlotting Error: ", error, "\n")
+
+    # fig14, (ax1) = plt.subplots()
+    # ax1.plot(time[-len(main_signal) :], main_signal, label="main")
+    # ax1.plot(time[-len(shifted_signal) :], shifted_signal, label="shifted")
+    # ax1.legend()
+
+    correct_order = []
+    for permutation in itertools.permutations(signals_list):
+        if correct_order_checker(permutation, time, T, sampling_time):
+            correct_perm = [
+                signal_names[next(i for i, x in enumerate(signals_list) if np.array_equal(x, signal))]
+                for signal in permutation
+            ]
+            for i in correct_perm:
+                correct_order.append(i)
+            print("Correct order:", correct_perm)
+            break
+
     print("=" * 120, "\n")
-    return 0
+
+    if correct_order == ["sinP", "cosP", "sinN", "cosN"]:
+        rps_pinning_status = [0, 0, 0, 0]
+    else:
+        rps_pinning_status = [1, 1, 1, 1]
+    return rps_pinning_status, correct_order
 
 
 # %% Toplevel Runner
@@ -440,5 +583,7 @@ if __name__ == "__main__":
     # print(f"Differential Status: {rps_static_status[2]}")
     # print(f"Non Normal Times: {rps_static_status[3]}")
     # print(f"Differential RMS values: {rps_static_status[4]}")
+    print(f"Pinning Status: {rps_order_status[0]}")
+    print(f"Current Order of Pinning: {rps_order_status[1]}")
     print("=" * 120, "\n")
     plt.show()
