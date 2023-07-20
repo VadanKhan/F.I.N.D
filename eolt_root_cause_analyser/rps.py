@@ -3,7 +3,6 @@ import itertools
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.optimize import curve_fit
 from sql_fetch import fetch_motor_details
 from sql_fetch import fetch_step_timings
 from tdms_fetch import form_filename_tdms
@@ -16,9 +15,9 @@ good_rps_test = [23918, "High_Speed", 20140]
 static_rps_test = [33931, "Cogging", 32537]
 order_uvw_test = [36288, "High_Speed", 31105]
 
-eol_test_id_V = good_rps_test[0]
-test_type_id_V = good_rps_test[1]
-test_id_V = good_rps_test[2]
+eol_test_id_V = static_rps_test[0]
+test_type_id_V = static_rps_test[1]
+test_id_V = static_rps_test[2]
 
 filename_V = form_filename_tdms(eol_test_id_V, test_type_id_V, test_id_V)
 df_filepath_V = form_filepath(filename_V)
@@ -61,7 +60,7 @@ def edge_filtering(step_dataframe: pd.DataFrame, time: np.ndarray):
     Returns:
         np.ndarray: An index array containing the indices of the filtered time values.
     """
-    print("_" * 60, "Filtering", "_" * 60)
+    print("_" * 60, "Edge Filtering", "_" * 60)
     step_durations: np.ndarray = step_dataframe["Duration_ms"].values / 1000
     accel_durations: np.ndarray = step_dataframe["Accel_Time_S"].values
     total_time = sum(step_durations)
@@ -76,15 +75,18 @@ def edge_filtering(step_dataframe: pd.DataFrame, time: np.ndarray):
     return filter_index_array
 
 
-def rps_prefilter(df_filepath, df_test, eol_test_id):
+def rps_prefilter(df_filepath, eol_test_id, test_type):
     """Filters RPS data based on the start and end times of a test.
 
-    This function takes in the file path to a DataFrame containing RPS data, a DataFrame containing test information, and an EOL test ID. The function filters the RPS data to only include values between the start and end times of the test, which are calculated based on the step durations and acceleration durations in the input DataFrame. The function returns a NumPy array containing the filtered RPS data.
+    This function takes in the file path to a DataFrame containing RPS data, an EOL test ID, and a test type. The
+        function filters the RPS data to only include values between the start and end times of the test, which are
+        calculated based on the step durations and acceleration durations in a DataFrame fetched using the input EOL
+        test ID and test type. The function returns a NumPy array containing the filtered RPS data.
 
     Args:
         df_filepath (str): The file path to a DataFrame containing RPS data.
-        df_test (pd.DataFrame): A DataFrame containing test information.
         eol_test_id (int): An EOL test ID.
+        test_type (str): The type of the test.
 
     Returns:
         np.ndarray: A NumPy array containing the filtered RPS data.
@@ -115,32 +117,11 @@ def rps_prefilter(df_filepath, df_test, eol_test_id):
 
     print("_" * 60, "fetch test details", "_" * 60)
     motor_type = fetch_motor_details(eol_test_id)
-    step_details_df: pd.DataFrame = fetch_step_timings(motor_type)
+    step_details_df: pd.DataFrame = fetch_step_timings(motor_type, test_type)
     print("=" * 120, "\n")
 
     filtered_index_array = edge_filtering(step_details_df, time_np)
     rps_data_np = rps_data_raw_np[filtered_index_array]
-    # print(rps_data_np)
-
-    # fig, (ax1, ax2) = plt.subplots(2, 1)
-    # ax1.plot(rps_data_raw_np[:, 0], rps_data_raw_np[:, 1])
-    # ax2.plot(rps_data_np[:, 0], rps_data_np[:, 1])
-    # fig.suptitle("SinP: Before / After prefilter")
-
-    # fig2, (ax1, ax2) = plt.subplots(2, 1)
-    # ax1.plot(rps_data_raw_np[:, 0], rps_data_raw_np[:, 2])
-    # ax2.plot(rps_data_np[:, 0], rps_data_np[:, 2])
-    # fig2.suptitle("SinN: Before / After prefilter")
-
-    # fig3, (ax1, ax2) = plt.subplots(2, 1)
-    # ax1.plot(rps_data_raw_np[:, 0], rps_data_raw_np[:, 3])
-    # ax2.plot(rps_data_np[:, 0], rps_data_np[:, 3])
-    # fig3.suptitle("CosP: Before / After prefilter")
-
-    # fig4, (ax1, ax2) = plt.subplots(2, 1)
-    # ax1.plot(rps_data_raw_np[:, 0], rps_data_raw_np[:, 4])
-    # ax2.plot(rps_data_np[:, 0], rps_data_np[:, 4])
-    # fig4.suptitle("CosN: Before / After prefilter")
 
     fig8, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1)
     ax1.plot(rps_data_np[:, 0], rps_data_np[:, 1])
@@ -165,13 +146,20 @@ def rps_prefilter(df_filepath, df_test, eol_test_id):
 
 
 def rps_signal_zero_checker(rps_data: np.ndarray):
-    """
-    This function checks for zero signals in the given RPS data.
+    """Checks for zero signals in the given RPS data.
 
-    :param rps_data: A numpy array containing RPS data.
-    :return: A list of strings indicating the status of each sensor. "Zero Signal" if the RMS value is less than or
-        equal to 0.01, otherwise 0.
+    This function takes a NumPy array containing RPS data as input and returns a list of strings indicating the status
+        of each sensor. If the RMS value of a sensor is less than or equal to 0.01, its status is "Zero Signal",
+        otherwise it is 0.
+
+    Args:
+        rps_data (np.ndarray): A NumPy array containing RPS data.
+
+    Returns:
+        tuple: A tuple containing two elements: a list of strings indicating the status of each sensor, and a list of
+        RMS values for each sensor.
     """
+
     print("_" * 60, "zero signal checker", "_" * 60)
     rms_values = []
     for i in range(4):
@@ -188,12 +176,18 @@ def rps_signal_zero_checker(rps_data: np.ndarray):
 
 
 def rps_signal_5V_checker(rps_data: np.ndarray):
-    """
-    This function checks for 5V signals in the given RPS data.
+    """Checks for 5V signals in the given RPS data.
 
-    :param rps_data: A numpy array containing RPS data.
-    :return: A list of strings indicating the status of each sensor. "5V Signal" if the RMS value is between 4.5 and
-        5.5, otherwise 0.
+    This function takes a NumPy array containing RPS data as input and returns a list of strings indicating the status
+        of each sensor. If the mean value of a sensor is between 4.5 and 5.5, its status is "5V Signal", otherwise it is
+        0.
+
+    Args:
+        rps_data (np.ndarray): A NumPy array containing RPS data.
+
+    Returns:
+        tuple: A tuple containing two elements: a list of strings indicating the status of each sensor, and a list of
+        mean values for each sensor.
     """
     print("_" * 60, "5V signal checker", "_" * 60)
     mean_values = []
@@ -211,36 +205,71 @@ def rps_signal_5V_checker(rps_data: np.ndarray):
 
 
 def moving_average_convolve(data: np.ndarray, spread: int):
-    """
-    Calculates the moving average of the input data with a rectangle window convolution, size defined by the spread
-        parameter.
+    """Calculates the moving average of the input data with a rectangle window convolution.
 
-    :param data: A 1D numpy array containing the data to be averaged.
-    :param spread: An integer defining the window size for the moving average calculation.
-    :return: A 1D numpy array containing the moving average of the input data.
+    This function takes a 1D NumPy array containing the data to be averaged and an integer defining the window size for
+        the moving average calculation as input. It returns a 1D NumPy array containing the moving average of the input
+        data.
+
+    Args:
+        data (np.ndarray): A 1D NumPy array containing the data to be averaged.
+        spread (int): An integer defining the window size for the moving average calculation.
+
+    Returns:
+        np.ndarray: A 1D NumPy array containing the moving average of the input data.
     """
     kernel = np.ones(spread) / spread
     averaged_data = np.convolve(data, kernel, mode="same")
     return averaged_data
 
 
-def remove_centre_data(time, eol_test_id, gap_width):
+def remove_centre_data(time, eol_test_id, test_type, gap_width):
+    """Removes data from the center of a given time array.
+
+    This function takes a 1D numpy array of time values, an eol_test_id, and a gap width as input. It returns two arrays
+    containing the indices of the time values that are outside the specified gap around the center of the time array.
+
+    Args:
+        time (array_like): The time values of the input data.
+        eol_test_id (int): The eol_test_id of the motor.
+        gap_width (float): The width of the gap to be removed from the center of the time array.
+
+    Returns:
+        tuple: A tuple containing two arrays: one with the indices of the time values that are below the lower bound
+            of the gap, and one with the indices of the time values that are above the upper bound of the gap.
+    """
     motor_type = fetch_motor_details(eol_test_id)
-    step_dataframe: pd.DataFrame = fetch_step_timings(motor_type)
+    step_dataframe: pd.DataFrame = fetch_step_timings(motor_type, test_type)
     step_durations: np.ndarray = step_dataframe["Duration_ms"].values / 1000
     accel_durations: np.ndarray = step_dataframe["Accel_Time_S"].values
-    upto_step_three = np.sum(step_durations[0:3])
-    halfway = upto_step_three + accel_durations[3] / 2
+    step_numbers = step_dataframe["Step_Number"].values
+    print(step_durations)
+    print(accel_durations)
+    num_steps = len(step_numbers)
+    halfway_point = int(num_steps / 2)
+    upto_halfway_durations = np.sum(step_durations[0:halfway_point])
+    halfway = upto_halfway_durations + accel_durations[halfway_point] / 2
     print("Halfway time: ", halfway)
     delta = gap_width / 2
-    gap_lower = halfway - delta
-    gap_higher = halfway + delta
     filtered_index_array_lower = np.where(time < (halfway - delta))[0]
     filtered_index_array_higher = np.where(time > (halfway + delta))[0]
     return filtered_index_array_lower, filtered_index_array_higher
 
 
-def rps_signal_static_checker(rps_data: np.ndarray):
+def rps_signal_static_checker(rps_data: np.ndarray, test_type):
+    """Checks for static signals in the given RPS data.
+
+    This function takes a NumPy array containing RPS data as input and returns two lists of strings indicating the
+        status of each sensor. The first list indicates whether the average value of each sensor is within a normal
+        range, and the second list indicates whether the differential RMS value of each sensor is above a certain
+        threshold.
+
+    Args:
+        rps_data (np.ndarray): A NumPy array containing RPS data.
+
+    Returns:
+        tuple: A tuple containing two lists of strings indicating the status of each sensor.
+    """
     print("_" * 60, "average static checker", "_" * 60)
     diff_arrays: list[np.ndarray] = []
     for i in range(4):
@@ -263,7 +292,7 @@ def rps_signal_static_checker(rps_data: np.ndarray):
         (rps_data[:, 0], smoothed_arrays[0], smoothed_arrays[1], smoothed_arrays[2], smoothed_arrays[3])
     )
 
-    gap_index_lower, gap_index_higher = remove_centre_data(rps_data[:, 0], eol_test_id_V, 5)
+    gap_index_lower, gap_index_higher = remove_centre_data(rps_data[:, 0], eol_test_id_V, test_type, 5)
     smoothed_gapped_data_lower = smoothed_data[gap_index_lower]
     smoothed_gapped_data_higher = smoothed_data[gap_index_higher]
     smoothed_gapped_data = np.vstack((smoothed_gapped_data_lower, smoothed_gapped_data_higher))
@@ -349,17 +378,16 @@ def rps_signal_static_checker(rps_data: np.ndarray):
 
 
 def normalise_signal(signal):
-    """Normalizes a given signal so that its values fall between -1 and 1.
+    """Normalizes a given signal so that its values fall between 0 and 1.
 
     This function takes a signal as input, calculates its minimum and maximum values, and uses them to rescale the
-        signal so that its values fall between 0 and 1. The rescaled signal is then transformed to have values between
-        -1 and 1 by multiplying it by 2 and subtracting 1.
+        signal so that its values fall between 0 and 1.
 
     Args:
         signal (array_like): The input signal to be normalized.
 
     Returns:
-        array_like: The normalized version of the input signal with values between -1 and 1.
+        array_like: The normalized version of the input signal with values between 0 and 1.
     """
     min_val = np.min(signal)
     max_val = np.max(signal)
@@ -367,23 +395,17 @@ def normalise_signal(signal):
 
 
 def calculate_frequencies(time, signals):
-    """
-    Calculates the frequency of each signal in the given data.
+    """Calculates the frequency of each signal in the given data.
 
     This function takes a 1D numpy array of time values and a 2D numpy array of signals as input, where each column of
     the signals array represents a different signal, and returns a list containing the frequency of each signal.
 
-    Parameters
-    ----------
-    time : array_like
-        The time values of the input data.
-    signals : array_like
-        The input signals, where each column represents a different signal.
+    Args:
+        time (array_like): The time values of the input data.
+        signals (array_like): The input signals, where each column represents a different signal.
 
-    Returns
-    -------
-    list
-        A list containing the frequency of each signal.
+    Returns:
+        list: A list containing the frequency of each signal.
     """
 
     # Calculate FFT of each signal
@@ -417,46 +439,54 @@ def calculate_frequencies(time, signals):
     return frequencies
 
 
-def align_signals(time, main_signal, move_signal, period, expected_phase_shift, sampling_time):
-    """
-    Aligns two given signals and calculates their average absolute difference. IT EXPECTS THE PHASE SHIFT IN UNITS OF 1
-        (eg. if signals differ in phase by pi/2, input 0.25)
+def align_signals(main_signal, move_signal, period, expected_phase_shift, sampling_time):
+    """Aligns two given signals and calculates their mean squared error.
 
     This function takes a 1D numpy array of time values, two 1D numpy arrays representing the two input signals,
     the period of the signals, and the expected phase shift between them as input. It returns the aligned portions
-    of the two signals and their average absolute difference.
+    of the two signals and their mean squared error.
 
-    Parameters
-    ----------
-    time : array_like
-        The time values of the input data.
-    main_signal : array_like
-        The first input signal.
-    move_signal : array_like
-        The second input signal.
-    period : float
-        The period of the signals.
-    expected_phase_shift : float
-        The expected phase shift between the two signals.
+    Note:
+        IT EXPECTS THE PHASE SHIFT IN UNITS OF 1 (eg. if signals differ in phase by pi/2, input 0.25)
 
-    Returns
-    -------
-    tuple
-        A tuple containing three elements: the aligned portion of the first signal, the aligned portion of the
-        second signal, and their average absolute difference.
+    Args:
+        main_signal (array_like): The first input signal.
+        move_signal (array_like): The second input signal.
+        period (float): The period of the signals.
+        expected_phase_shift (float): The expected phase shift between the two signals.
+
+    Returns:
+        tuple: A tuple containing three elements: the aligned portion of the first signal, the aligned portion of the
+            second signal, and their mean squared error.
     """
 
     # Shift second signal to overlap with first signal
     time_shift = round((expected_phase_shift * period) / sampling_time)
     shifted_signal = np.roll(move_signal, time_shift)
 
-    # Calculate average absolute difference between shifted signals, ignoring rolled values
-    avg_abs_diff = np.mean((main_signal[time_shift:] - shifted_signal[time_shift:]) ** 2)
+    # Calculate mean squared error between shifted signals, ignoring rolled values
+    mse = np.mean((main_signal[time_shift:] - shifted_signal[time_shift:]) ** 2)
 
-    return main_signal[time_shift:], shifted_signal[time_shift:], avg_abs_diff
+    return main_signal[time_shift:], shifted_signal[time_shift:], mse
 
 
 def correct_order_checker(signal_list, time, period, sampling_time):
+    """Checks if the given signals are in the correct order by aligning them and calculating their average absolute
+        difference.
+
+    This function takes a list of four signals, a 1D numpy array of time values, the period of the signals, and the
+        sampling time as input. It returns a boolean value indicating whether the signals are in the correct order or
+        not.
+
+    Args:
+        signal_list (list): A list containing four 1D numpy arrays representing the input signals.
+        time (array_like): The time values of the input data.
+        period (float): The period of the signals.
+        sampling_time (float): The sampling time of the signals.
+
+    Returns:
+        bool: A boolean value indicating whether the signals are in the correct order or not.
+    """
     sinP = signal_list[0]
     cosP = signal_list[1]
     sinN = signal_list[2]
@@ -464,38 +494,38 @@ def correct_order_checker(signal_list, time, period, sampling_time):
 
     # check sinP shifts correctly
     sinp_sinp = np.array([0, 0, 0])
-    sinp_cosp = align_signals(time, cosP, sinP, period, 0.25, sampling_time)
-    sinp_sinn = align_signals(time, sinN, sinP, period, 0.5, sampling_time)
-    sinp_cosn = align_signals(time, cosN, sinP, period, 0.75, sampling_time)
+    sinp_cosp = align_signals(cosP, sinP, period, 0.25, sampling_time)
+    sinp_sinn = align_signals(sinN, sinP, period, 0.5, sampling_time)
+    sinp_cosn = align_signals(cosN, sinP, period, 0.75, sampling_time)
     sinp_start_line = np.array([sinp_sinp[2], sinp_cosp[2], sinp_sinn[2], sinp_cosn[2]])
     print("sinP aligning check: ", sinp_start_line)
 
     # check cosp shifts correctly
-    cosp_sinp = align_signals(time, sinP, cosP, period, 0.75, sampling_time)
+    cosp_sinp = align_signals(sinP, cosP, period, 0.75, sampling_time)
     cosp_cosp = np.array([0, 0, 0])
-    cosp_sinn = align_signals(time, sinN, cosP, period, 0.25, sampling_time)
-    cosp_cosn = align_signals(time, cosN, cosP, period, 0.5, sampling_time)
+    cosp_sinn = align_signals(sinN, cosP, period, 0.25, sampling_time)
+    cosp_cosn = align_signals(cosN, cosP, period, 0.5, sampling_time)
     cosp_start_line = np.array([cosp_sinp[2], cosp_cosp[2], cosp_sinn[2], cosp_cosn[2]])
     print("cosp aligning check: ", cosp_start_line)
 
     # check sinn shifts correctly
-    sinn_sinp = align_signals(time, sinP, sinN, period, 0.5, sampling_time)
-    sinn_cosp = align_signals(time, cosP, sinN, period, 0.75, sampling_time)
+    sinn_sinp = align_signals(sinP, sinN, period, 0.5, sampling_time)
+    sinn_cosp = align_signals(cosP, sinN, period, 0.75, sampling_time)
     sinn_sinn = np.array([0, 0, 0])
-    sinn_cosn = align_signals(time, cosN, sinN, period, 0.25, sampling_time)
+    sinn_cosn = align_signals(cosN, sinN, period, 0.25, sampling_time)
     sinn_start_line = np.array([sinn_sinp[2], sinn_cosp[2], sinn_sinn[2], sinn_cosn[2]])
     print("sinn aligning check: ", sinn_start_line)
 
     # check cosnn shifts correctly
-    cosn_sinp = align_signals(time, sinP, cosN, period, 0.25, sampling_time)
-    cosn_cosp = align_signals(time, cosP, cosN, period, 0.5, sampling_time)
-    cosn_sinn = align_signals(time, sinN, cosN, period, 0.75, sampling_time)
+    cosn_sinp = align_signals(sinP, cosN, period, 0.25, sampling_time)
+    cosn_cosp = align_signals(cosP, cosN, period, 0.5, sampling_time)
+    cosn_sinn = align_signals(sinN, cosN, period, 0.75, sampling_time)
     cosn_cosn = np.array([0, 0, 0])
     cosn_start_line = np.array([cosn_sinp[2], cosn_cosp[2], cosn_sinn[2], cosn_cosn[2]])
     print("cosn aligning check: ", cosn_start_line)
 
     alignment_matrix = np.vstack((sinp_start_line, cosp_start_line, sinn_start_line, cosn_start_line))
-    alignment_matrix = np.where(alignment_matrix > 0.5, 1, 0)
+    alignment_matrix = np.where(alignment_matrix > OUT_OF_PHASE_SQUARE_ERROR_LOW, 1, 0)
     print("\nAlignment Matrix:\n", alignment_matrix)
 
     if np.all(alignment_matrix == 0):
@@ -505,10 +535,22 @@ def correct_order_checker(signal_list, time, period, sampling_time):
 
 
 def rps_order_checker(rps_data: np.ndarray):
+    """Checks the order of the given RPS signals.
+
+    This function takes a NumPy array containing RPS data as input and returns a list of integers indicating the status
+        of each sensor and a list of strings indicating the correct order of the sensors. If the sensors are in the
+        correct order, the status of each sensor is 0, otherwise it is 1.
+
+    Args:
+        rps_data (np.ndarray): A NumPy array containing RPS data.
+
+    Returns:
+        tuple: A tuple containing a list of integers indicating the status of each sensor and a list of strings
+        indicating the correct order of the sensors.
+    """
     print("_" * 60, "order checker", "_" * 60)
-    time = rps_data[100000:100100, 0]  #  np.linspace(25, 25.01, 100)
+    time = rps_data[100000:100100, 0]  # np.linspace(25, 25.01, 100)
     sampling_time = np.mean(np.diff(time))
-    sampling_freq = 1 / sampling_time  # Sampling frequency
     sinP = rps_data[100000:100100, 1]  # sinP
     cosP = rps_data[100000:100100, 3]  # cosP
     sinN = rps_data[100000:100100, 2]  # sinN
@@ -533,12 +575,17 @@ def rps_order_checker(rps_data: np.ndarray):
     ax5.plot(time, cosN, label="CosN")
     plt.legend()
 
-    frequencies = calculate_frequencies(time, signals)
-    T = 1 / np.mean(frequencies)
+    try:
+        frequencies = calculate_frequencies(time, signals)
+        T = 1 / np.mean(frequencies)
+        print(f"The frequencies of the signals are {frequencies}, period: {T}")
+    except Exception as e:
+        print(f"Error calculating frequencies: {e}")
+        return ["FFT error", "FFT error"]
 
     print(f"The frequencies of the signals are {frequencies}, period: {T}")
 
-    main_signal, shifted_signal, error = align_signals(time, cosN, cosP, T, 0.5, sampling_time)
+    main_signal, shifted_signal, error = align_signals(cosN, cosP, T, 0.5, sampling_time)
     print("\nPlotting Error: ", error, "\n")
 
     # fig14, (ax1) = plt.subplots()
@@ -569,19 +616,19 @@ def rps_order_checker(rps_data: np.ndarray):
 
 # %% Toplevel Runner
 if __name__ == "__main__":
-    rps_data_np_V = rps_prefilter(df_filepath_V, df_test_V, eol_test_id_V)
+    rps_data_np_V = rps_prefilter(df_filepath_V, eol_test_id_V, test_type_id_V)
     # rps_zero_status = rps_signal_zero_checker(rps_data_np_V)
-    # rps_short_status = rps_signal_5V_checker(rps_data_np_V)
-    # rps_static_status = rps_signal_static_checker(rps_data_np_V)
+    # rps_short_status = rps_sicogging_5V_checker(rps_data_np_V)
+    rps_static_status = rps_signal_static_checker(rps_data_np_V, test_type_id_V)
     rps_order_status = rps_order_checker(rps_data_np_V)
     print("_" * 60, "Results", "_" * 60)
     # print(rps_zero_status)
     # print(rps_short_status)
-    # print(f"Overall Results: {rps_static_status[0]}")
-    # print(f"Average Status: {rps_static_status[1]}")
-    # print(f"Differential Status: {rps_static_status[2]}")
-    # print(f"Non Normal Times: {rps_static_status[3]}")
-    # print(f"Differential RMS values: {rps_static_status[4]}")
+    print(f"Overall Results: {rps_static_status[0]}")
+    print(f"Average Status: {rps_static_status[1]}")
+    print(f"Differential Status: {rps_static_status[2]}")
+    print(f"Non Normal Times: {rps_static_status[3]}")
+    print(f"Differential RMS values: {rps_static_status[4]}")
     print(f"Pinning Status: {rps_order_status[0]}")
     print(f"Current Order of Pinning: {rps_order_status[1]}")
     print("=" * 120, "\n")

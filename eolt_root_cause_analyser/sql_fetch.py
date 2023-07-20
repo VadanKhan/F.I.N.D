@@ -63,23 +63,26 @@ def fetch_motor_details(eol_test_id):
     return motor_type
 
 
-def fetch_step_timings(motor_type):
-    """Fetches the EOL_Test_ID from the database table Test_{test_type_id} where Test_ID is equal to the given test_id.
+def fetch_step_timings(motor_type, test_type):
+    """Fetches step timings from the database for the given motor type and test type.
+
+    This function takes a motor type and a test type as input and returns a DataFrame containing the step number,
+        duration, and acceleration time for each step in the test.
 
     Args:
-        test_id (int): The ID of the test to fetch the EOL_Test_ID for.
-        test_type_id (int): The ID of the test type to fetch the EOL_Test_ID from.
+        motor_type (str): The type of the motor to fetch step timings for.
+        test_type (str): The type of the test to fetch step timings for.
 
     Returns:
-        int or Error: The fetched EOL_Test_ID or an error object if an error occurred.
+        pd.DataFrame: A DataFrame containing the step number, duration, and acceleration time for each step in the test.
     """
     connection = eolt_connect()
     motor_type_df = pd.read_sql_query(
         f"""Select Step_Number, Duration_ms, Accel_Time_S
-        FROM StepDescription_High_Speed
-        INNER JOIN DriveCycleStep_High_Speed ON Step_ID = Step_Description_ID
-        INNER JOIN DriveCycle_High_Speed ON Cycle_ID = Drive_Cycle_ID
-        INNER JOIN MotorTypes ON Drive_Cycle_ID = High_Speed_Cycle_ID
+        FROM StepDescription_{test_type}
+        INNER JOIN DriveCycleStep_{test_type} ON Step_ID = Step_Description_ID
+        INNER JOIN DriveCycle_{test_type} ON Cycle_ID = Drive_Cycle_ID
+        INNER JOIN MotorTypes ON Drive_Cycle_ID = {test_type}_Cycle_ID
         WHERE Motor_Type_ID='{motor_type}' """,
         connection,
     )
