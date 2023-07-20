@@ -3,6 +3,7 @@ import itertools
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy.optimize import curve_fit
 from sql_fetch import fetch_motor_details
 from sql_fetch import fetch_step_timings
 from tdms_fetch import form_filename_tdms
