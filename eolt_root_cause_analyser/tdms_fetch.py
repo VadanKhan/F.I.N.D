@@ -127,14 +127,14 @@ def form_filepath(filename):
     # Get the parent directory of the script file
     parent_dir = Path(__file__).parent
 
-    # Get up two levels in the parent directory
-    two_levels_up = parent_dir.parents[1]
+    # Get up 1 levels in the parent directory
+    one_levels_up = parent_dir.parents[0]
 
     # Define the relative path to the target file
     relative_path = rf"Sample TDMS files\{filename}"
 
     # Join the parent directory with the relative path
-    tdms_file_path = two_levels_up / relative_path
+    tdms_file_path = one_levels_up / relative_path
 
     # Check if the target directory exists
     if tdms_file_path.exists():
