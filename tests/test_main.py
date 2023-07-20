@@ -91,7 +91,7 @@ def test_form_filename_tdms():
 def test_form_filepath():
     with patch.object(sys.modules[__name__], "__file__", "C:/Users/Vadan.Khan/Documents/Project/test/form_filepath.py"):
         result = form_filepath("test.tdms")
-        expected = Path("C:/Users/Vadan.Khan/Documents/Project/Sample TDMS files/test.tdms")
+        expected = Path("C:/Users/Vadan.Khan/Documents/Project/eolt-root-cause-analyser/Sample TDMS files/test.tdms")
         assert result == expected
 
 
