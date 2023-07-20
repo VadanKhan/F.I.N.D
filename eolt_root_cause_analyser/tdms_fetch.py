@@ -1,7 +1,6 @@
 import re
 import sys
 from pathlib import Path
-from typing import Any
 from typing import Optional
 from warnings import warn
 
@@ -93,38 +92,28 @@ def _apply_channel_map(
     return tdms_file
 
 
-def form_filename_tdms(eol_test_id, test_type_id, test_id):
-    """Forms a filename for the EOL TDMS files using the given test_id, test_type_id, and eol_test_id.
-
-    Args:
-        test_id (int): The ID of the test.
-        test_type_id (int): The ID of the test type.
-        eol_test_id (int): The EOL_Test_ID.
-
-    Returns:
-        str: The formed filename for the TDMS file.
-    """
-    filename = f"{eol_test_id}_{test_type_id}_{test_id}.tdms"
-    print("=" * 120)
-    print(f"Looking for: {filename}")
-    print("=" * 120, "\n")
-    return filename
-
-
-def form_filepath(filename):
+def form_filepath(eol_test_id, test_type_id, test_id):
     """
     Forms a file path for a TDMS file.
 
-    This function takes a filename as an argument and returns a Path object representing the full path to the TDMS file.
-        The path is constructed by joining the specified filename with a predefined base directory.
+    This function takes an EOL test ID, a test type ID, and a test ID as arguments and returns a Path object
+        representing the full path to the TDMS file. The path is constructed by joining a filename formed from the input
+        arguments with a predefined base directory.
 
     Args:
-        filename: The name of the TDMS file.
+        eol_test_id: The EOL test ID.
+        test_type_id: The test type ID.
+        test_id: The test ID.
 
     Returns:
         A Path object representing the full path to the TDMS file.
     """
+
+    # form filename
+    filename = f"{eol_test_id}_{test_type_id}_{test_id}.tdms"
+
     # Get the parent directory of the script file
+
     parent_dir = Path(__file__).parent
 
     # Get up 1 levels in the parent directory
@@ -137,14 +126,8 @@ def form_filepath(filename):
     tdms_file_path = one_levels_up / relative_path
 
     # Check if the target directory exists
-    if tdms_file_path.exists():
-        print("=" * 120)
-        print(f"Target directory found: {tdms_file_path}")
-        print("=" * 120, "\n")
-    else:
-        print("=" * 120)
-        print("Target directory not found")
-        print("=" * 120, "\n")
+    if not (tdms_file_path.exists()):
+        print("Target TDMS directory not found")
 
     # tdms_file_path = Path(rf"C:\Users\Vadan.Khan\Documents\Project\Sample TDMS files\{filename}")
 
@@ -165,7 +148,6 @@ def read_tdms(tdms_file_path):
     Returns:
         A pandas DataFrame containing the data from the TDMS file.
     """
-    print("_" * 60, "Reading TDMS", "_" * 60)
     tdms_file = TdmsFile.read(tdms_file_path)
 
     # Converting TDMS data to a pandas DataFrame

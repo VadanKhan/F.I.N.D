@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 from sql_fetch import fetch_motor_details
 from sql_fetch import fetch_step_timings
-from tdms_fetch import form_filename_tdms
 from tdms_fetch import form_filepath
 from tdms_fetch import get_time_series_data
 from tdms_fetch import read_tdms
@@ -20,8 +19,7 @@ eol_test_id_V = static_rps_test[0]
 test_type_id_V = static_rps_test[1]
 test_id_V = static_rps_test[2]
 
-filename_V = form_filename_tdms(eol_test_id_V, test_type_id_V, test_id_V)
-df_filepath_V = form_filepath(filename_V)
+df_filepath_V = form_filepath(eol_test_id_V, test_type_id_V, test_id_V)
 df_test_V = read_tdms(df_filepath_V)
 
 # %%

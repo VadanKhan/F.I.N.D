@@ -36,7 +36,6 @@ def fetch_eol(test_id, test_type_id):
     connection = eolt_connect()
     eol_test_id = pd.read_sql_query(f"SELECT EOL_Test_ID from Test_{test_type_id} WHERE Test_ID={test_id}", connection)
     eol_test_id_value = eol_test_id.iloc[0, 0]
-    print(f"\nReceived EOL Test ID: {eol_test_id_value}\n")
     # print(eol_test_id)
 
     connection.close()
@@ -55,7 +54,6 @@ def fetch_motor_details(eol_test_id: int):
     connection = eolt_connect()
     motor_type_db = pd.read_sql_query(f"SELECT Motor_Type FROM EOLTest WHERE EOL_Test_ID={eol_test_id}", connection)
     motor_type = motor_type_db.iloc[0, 0]
-    print(f"\nReceived Motor Type: {motor_type}\n")
     # print(eol_test_id)
 
     connection.close()
@@ -85,9 +83,6 @@ def fetch_step_timings(motor_type, test_type):
         WHERE Motor_Type_ID='{motor_type}' """,
         connection,
     )
-    # motor_type = motor_type_db.iloc[0, 0]
-    print(f"\nReceived Dataframe:\n {motor_type_df}")
-    # print(eol_test_id)
 
     connection.close()
     return motor_type_df
