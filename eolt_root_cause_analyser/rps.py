@@ -23,13 +23,13 @@ df_filepath_V = form_filepath(eol_test_id_V, test_type_id_V, test_id_V)
 df_test_V = read_tdms(df_filepath_V)
 
 # %%
-print("_" * 60, "Database Check", "_" * 60)
-df = df_test_V
-# df = df.reset_index()
-# print(f"{df}")
-columns = list(df.columns)
-# print(f"{columns}")
-print("=" * 120, "\n")
+# print("_" * 60, "Database Check", "_" * 60)
+# df = df_test_V
+# # df = df.reset_index()
+# # print(f"{df}")
+# columns = list(df.columns)
+# # print(f"{columns}")
+# print("=" * 120, "\n")
 
 # %% Hardcoded Settings
 ZERO_RMS_UPPER_THRESHOLD = 0.01
@@ -92,7 +92,6 @@ def rps_prefilter(df_filepath, eol_test_id, test_type):
     """
     print("_" * 60, "RPS prefilter", "_" * 60)
     rps_channel_list = ["SinP", "SinN", "CosP", "CosN"]
-    print("_" * 60, "Get RPS time values & convert to numpy", "_" * 60)
     rps_time_list = get_time_series_data(df_filepath, rps_channel_list)
 
     # print(f"{rps_time_list[0]}")
@@ -107,17 +106,12 @@ def rps_prefilter(df_filepath, eol_test_id, test_type):
     CosP_timevals_pd = CosP_df.CosP
     CosN_timevals_pd = CosN_df.CosN
     RPS_df = pd.concat([time, SinP_timevals_pd, SinN_timevals_pd, CosP_timevals_pd, CosN_timevals_pd], axis=1)
-    print(f"{RPS_df}\n")
     rps_data_raw_np: np.ndarray = RPS_df.values
-    print(f"As a numpy array:\n{rps_data_raw_np}\n")
-    print("=" * 120, "\n")
 
     time_np = rps_data_raw_np[:, 0]
 
-    print("_" * 60, "fetch test details", "_" * 60)
     motor_type = fetch_motor_details(eol_test_id)
     step_details_df: pd.DataFrame = fetch_step_timings(motor_type, test_type)
-    print("=" * 120, "\n")
 
     filtered_index_array = edge_filtering(step_details_df, time_np)
     rps_data_np = rps_data_raw_np[filtered_index_array]
@@ -299,9 +293,6 @@ def rps_signal_static_checker(rps_data: np.ndarray, test_type):
     smoothed_gapped_data_higher = smoothed_data[gap_index_higher]
     smoothed_gapped_data = np.vstack((smoothed_gapped_data_lower, smoothed_gapped_data_higher))
     smoothed_gapped_data = smoothed_gapped_data[spread_input:-spread_input]
-
-    print("\n Smoothed Data length: ", len(smoothed_data[:, 0]))
-    print("\n Smoothed Gapped Data length: ", len(smoothed_gapped_data[:, 0]))
 
     # fig6, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1)
     # ax1.plot(rps_data[:, 0], smoothed_data[:, 1])
@@ -500,7 +491,6 @@ def correct_order_checker(signal_list, time, period, sampling_time):
     sinp_sinn = align_signals(sinN, sinP, period, 0.5, sampling_time)
     sinp_cosn = align_signals(cosN, sinP, period, 0.75, sampling_time)
     sinp_start_line = np.array([sinp_sinp[2], sinp_cosp[2], sinp_sinn[2], sinp_cosn[2]])
-    print("sinP aligning check: ", sinp_start_line)
 
     # check cosp shifts correctly
     cosp_sinp = align_signals(sinP, cosP, period, 0.75, sampling_time)
@@ -508,7 +498,6 @@ def correct_order_checker(signal_list, time, period, sampling_time):
     cosp_sinn = align_signals(sinN, cosP, period, 0.25, sampling_time)
     cosp_cosn = align_signals(cosN, cosP, period, 0.5, sampling_time)
     cosp_start_line = np.array([cosp_sinp[2], cosp_cosp[2], cosp_sinn[2], cosp_cosn[2]])
-    print("cosp aligning check: ", cosp_start_line)
 
     # check sinn shifts correctly
     sinn_sinp = align_signals(sinP, sinN, period, 0.5, sampling_time)
@@ -516,7 +505,6 @@ def correct_order_checker(signal_list, time, period, sampling_time):
     sinn_sinn = np.array([0, 0, 0])
     sinn_cosn = align_signals(cosN, sinN, period, 0.25, sampling_time)
     sinn_start_line = np.array([sinn_sinp[2], sinn_cosp[2], sinn_sinn[2], sinn_cosn[2]])
-    print("sinn aligning check: ", sinn_start_line)
 
     # check cosnn shifts correctly
     cosn_sinp = align_signals(sinP, cosN, period, 0.25, sampling_time)
@@ -524,7 +512,6 @@ def correct_order_checker(signal_list, time, period, sampling_time):
     cosn_sinn = align_signals(sinN, cosN, period, 0.75, sampling_time)
     cosn_cosn = np.array([0, 0, 0])
     cosn_start_line = np.array([cosn_sinp[2], cosn_cosp[2], cosn_sinn[2], cosn_cosn[2]])
-    print("cosn aligning check: ", cosn_start_line)
 
     alignment_matrix = np.vstack((sinp_start_line, cosp_start_line, sinn_start_line, cosn_start_line))
     alignment_matrix = np.where(alignment_matrix > OUT_OF_PHASE_SQUARE_ERROR_LOW, 1, 0)
@@ -580,15 +567,12 @@ def rps_order_checker(rps_data: np.ndarray):
     try:
         frequencies = calculate_frequencies(time, signals)
         T = 1 / np.mean(frequencies)
-        print(f"The frequencies of the signals are {frequencies}, period: {T}")
     except Exception as e:
         print(f"Error calculating frequencies: {e}")
         return ["FFT error", "FFT error"]
 
-    print(f"The frequencies of the signals are {frequencies}, period: {T}")
-
-    main_signal, shifted_signal, error = align_signals(cosN, cosP, T, 0.5, sampling_time)
-    print("\nPlotting Error: ", error, "\n")
+    # main_signal, shifted_signal, error = align_signals(cosN, cosP, T, 0.5, sampling_time)
+    # print("\nPlotting Error: ", error, "\n")
 
     # fig14, (ax1) = plt.subplots()
     # ax1.plot(time[-len(main_signal) :], main_signal, label="main")
@@ -604,7 +588,6 @@ def rps_order_checker(rps_data: np.ndarray):
             ]
             for i in correct_perm:
                 correct_order.append(i)
-            print("Correct order:", correct_perm)
             break
 
     print("=" * 120, "\n")
