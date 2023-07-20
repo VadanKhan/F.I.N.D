@@ -43,15 +43,14 @@ def fetch_eol(test_id, test_type_id):
     return eol_test_id_value
 
 
-def fetch_motor_details(eol_test_id):
-    """Fetches the EOL_Test_ID from the database table Test_{test_type_id} where Test_ID is equal to the given test_id.
+def fetch_motor_details(eol_test_id: int):
+    """Fetches the motor type from the EOLTest database table for a given EOL_Test_ID.
 
     Args:
-        test_id (int): The ID of the test to fetch the EOL_Test_ID for.
-        test_type_id (int): The ID of the test type to fetch the EOL_Test_ID from.
+        eol_test_id (int): The ID of the EOL test to fetch the motor type for.
 
     Returns:
-        int or Error: The fetched EOL_Test_ID or an error object if an error occurred.
+        int or Error: The fetched motor type or an error object if an error occurred.
     """
     connection = eolt_connect()
     motor_type_db = pd.read_sql_query(f"SELECT Motor_Type FROM EOLTest WHERE EOL_Test_ID={eol_test_id}", connection)

@@ -1,9 +1,9 @@
 import itertools
+from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.optimize import curve_fit
 from sql_fetch import fetch_motor_details
 from sql_fetch import fetch_step_timings
 from tdms_fetch import form_filename_tdms
@@ -162,14 +162,14 @@ def rps_signal_zero_checker(rps_data: np.ndarray):
     """
 
     print("_" * 60, "zero signal checker", "_" * 60)
-    rms_values = []
+    rms_values: list = []
     for i in range(4):
         rms = np.sqrt(np.mean(rps_data[:, i + 1] ** 2))
         rms_values.append(rms)
     rps_signal_sensor_status = []
     for i in range(len(rms_values)):
         if rms_values[i] <= ZERO_RMS_UPPER_THRESHOLD:
-            rps_signal_sensor_status.append("Zero Signal")
+            rps_signal_sensor_status.append(1)
         else:
             rps_signal_sensor_status.append(0)
     print("=" * 120, "\n")
@@ -198,7 +198,7 @@ def rps_signal_5V_checker(rps_data: np.ndarray):
     rps_signal_sensor_status = []
     for i in range(len(mean_values)):
         if mean_values[i] <= SHORT_THRESHOLD_HIGH and mean_values[i] >= SHORT_THRESHOLD_LOW:
-            rps_signal_sensor_status.append("5V Signal")
+            rps_signal_sensor_status.append(1)
         else:
             rps_signal_sensor_status.append(0)
     print("=" * 120, "\n")
@@ -224,15 +224,17 @@ def moving_average_convolve(data: np.ndarray, spread: int):
     return averaged_data
 
 
-def remove_centre_data(time, eol_test_id, test_type, gap_width):
+def remove_centre_data(time: np.ndarray, eol_test_id, test_type, gap_width) -> Tuple[np.ndarray, np.ndarray]:
     """Removes data from the center of a given time array.
 
-    This function takes a 1D numpy array of time values, an eol_test_id, and a gap width as input. It returns two arrays
-    containing the indices of the time values that are outside the specified gap around the center of the time array.
+    This function takes a 1D numpy array of time values, an eol_test_id, a test_type, and a gap width as input. It
+        returns two arrays containing the indices of the time values that are outside the specified gap around the
+        center of the time array.
 
     Args:
-        time (array_like): The time values of the input data.
+        time (np.ndarray): The time values of the input data.
         eol_test_id (int): The eol_test_id of the motor.
+        test_type (str): The type of test being performed.
         gap_width (float): The width of the gap to be removed from the center of the time array.
 
     Returns:
@@ -260,13 +262,14 @@ def remove_centre_data(time, eol_test_id, test_type, gap_width):
 def rps_signal_static_checker(rps_data: np.ndarray, test_type):
     """Checks for static signals in the given RPS data.
 
-    This function takes a NumPy array containing RPS data as input and returns two lists of strings indicating the
-        status of each sensor. The first list indicates whether the average value of each sensor is within a normal
-        range, and the second list indicates whether the differential RMS value of each sensor is above a certain
-        threshold.
+    This function takes a NumPy array containing RPS data and a test_type as input and returns two lists of strings
+        indicating the status of each sensor. The first list indicates whether the average value of each sensor is
+        within a normal range, and the second list indicates whether the differential RMS value of each sensor is above
+        a certain threshold.
 
     Args:
         rps_data (np.ndarray): A NumPy array containing RPS data.
+        test_type (str): The type of test being performed.
 
     Returns:
         tuple: A tuple containing two lists of strings indicating the status of each sensor.
@@ -349,7 +352,7 @@ def rps_signal_static_checker(rps_data: np.ndarray, test_type):
             average_status.append(f"Strange Rest Position from {non_normal_time[0]} to {non_normal_time[-1]}")
         elif non_normal_time == 0:
             # Handle the case where non_normal_time is equal to 0
-            average_status.append(0)
+            average_status.append(str(0))
         else:
             # Handle any other cases
             print("Error: Unexpected non_normal_time")
@@ -357,14 +360,14 @@ def rps_signal_static_checker(rps_data: np.ndarray, test_type):
     differential_status = []
     for rms_diff in differential_rms_values:
         if rms_diff > DIFFERENTIAL_RMS_LOW:
-            differential_status.append(0)
+            differential_status.append(str(0))
         else:
             differential_status.append("Signal Appears Static")
 
     overall_results = []
     for i in range(len(differential_status)):
         if average_status[i] == 0 and differential_status[i] == 0:
-            overall_results.append(0)
+            overall_results.append(str(0))
         elif average_status[i] != 0 and differential_status[i] != 0:
             overall_results.append("Static Signal")
         elif average_status[i] != 0 and differential_status[i] == 0:
@@ -455,6 +458,7 @@ def align_signals(main_signal, move_signal, period, expected_phase_shift, sampli
         move_signal (array_like): The second input signal.
         period (float): The period of the signals.
         expected_phase_shift (float): The expected phase shift between the two signals.
+        sampling_time (float): The time interval between samples.
 
     Returns:
         tuple: A tuple containing three elements: the aligned portion of the first signal, the aligned portion of the
