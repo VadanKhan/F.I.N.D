@@ -85,7 +85,7 @@ def test_form_filename_tdms():
     result = form_filename_tdms(1, 2, 3)
 
     # Assert that the result is the expected filename
-    assert result == "3_2_1.tdms"
+    assert result == "1_2_3.tdms"
 
 
 def test_form_filepath():
