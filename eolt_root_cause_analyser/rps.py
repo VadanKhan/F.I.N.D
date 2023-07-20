@@ -335,10 +335,10 @@ def rps_signal_static_checker(rps_data: np.ndarray, test_type):
             | (smoothed_gapped_data[:, i + 1] < NORMAL_AVERAGE_LOW)
         )[0]
         if non_normal_index.size <= 1000:
-            non_normal_times.append([0])
+            non_normal_times.append(np.array([0]))
         else:
             non_normal_time = smoothed_gapped_time[non_normal_index]
-            non_normal_times.append(list(non_normal_time))
+            non_normal_times.append(non_normal_time)
 
     differential_rms_values = []
     for i in range(4):
@@ -347,12 +347,14 @@ def rps_signal_static_checker(rps_data: np.ndarray, test_type):
 
     average_status = []
     for non_normal_time in non_normal_times:
-        if isinstance(non_normal_time, np.ndarray):
+        if len(non_normal_time) > 1:
             # Handle the case where non_normal_time is an array
             average_status.append(f"Strange Rest Position from {non_normal_time[0]} to {non_normal_time[-1]}")
-        else:
-            # Handle any other cases
+        elif len(non_normal_time) == 1:
             average_status.append(str(0))
+        else:
+            average_status.append("Averaging Error")
+            return ["error", "error", "error", "error", "error"]
 
     differential_status = []
     for rms_diff in differential_rms_values:
