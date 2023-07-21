@@ -186,13 +186,11 @@ def get_time_series_data(tdms_filepath, channel_names: list[str]) -> list[pd.Dat
     try:
         with TdmsFile.open(tdms_filepath) as tdms_file:
             for channel_name in channel_names:
-                print("Searching for Channel: ", channel_name)
                 for group_name in tdms_file.groups():
                     group_name = str(group_name)  # converts to string
                     group_name = group_name.split("'")[1]  # trims to only extract the name between ''
                     group = tdms_file[group_name]
                     if channel_name in group:
-                        print(f"Channel '{channel_name}' found in group '{group_name}'\n")
                         channel = group[channel_name]  # Specifies the channel to look at
                         time_data = channel.time_track()  # Gets the time values for the channel
                         channel_data = channel[:]  # Gets raw data from the channel into an array

@@ -15,31 +15,23 @@ good_rps_test = [23918, "High_Speed", 20140]
 static_rps_test = [33931, "Cogging", 32537]
 order_uvw_test = [36288, "High_Speed", 31105]
 
-eol_test_id_V = static_rps_test[0]
-test_type_id_V = static_rps_test[1]
-test_id_V = static_rps_test[2]
+eol_test_id_V = good_rps_test[0]
+test_type_id_V = good_rps_test[1]
+test_id_V = good_rps_test[2]
 
 df_filepath_V = form_filepath(eol_test_id_V, test_type_id_V, test_id_V)
 df_test_V = read_tdms(df_filepath_V)
 
-# %%
-# print("_" * 60, "Database Check", "_" * 60)
-# df = df_test_V
-# # df = df.reset_index()
-# # print(f"{df}")
-# columns = list(df.columns)
-# # print(f"{columns}")
-# print("=" * 120, "\n")
-
 # %% Hardcoded Settings
-ZERO_RMS_UPPER_THRESHOLD = 0.01
-SHORT_THRESHOLD_HIGH = 4.5
-SHORT_THRESHOLD_LOW = 5.5
-AVERAGING_SPREAD = 500
-NORMAL_AVERAGE_LOW = 2.4
-NORMAL_AVERAGE_HIGH = 2.6
-DIFFERENTIAL_RMS_LOW = 0.05
-OUT_OF_PHASE_SQUARE_ERROR_LOW = 0.5
+ZEROCHECKER_LOW_RMS = 0.01
+SHORTCHECKER_LOW = 4.5
+SHORTCHECKER_HIGH = 5.5
+STATICCHECKER_TOPHAT_WIDTH = 500
+STATICCHECKER_LOW_RESTVALUE = 2.4
+STATICCHECKER_HIGH_RESTVALUE = 2.6
+STATICCHECKER_LOW_DIFFERENTIAL_RMS = 0.05
+ORDERCHECKER_SIGNAL_MSE_LOW = 0.5
+ORDERCHECKER_SIGNAL_SELECT_FRACTION = 0.25
 
 
 # %%
@@ -59,13 +51,12 @@ def edge_filtering(step_dataframe: pd.DataFrame, time: np.ndarray):
     Returns:
         np.ndarray: An index array containing the indices of the filtered time values.
     """
-    print("_" * 60, "Edge Filtering", "_" * 60)
     step_durations: np.ndarray = step_dataframe["Duration_ms"].values / 1000
     accel_durations: np.ndarray = step_dataframe["Accel_Time_S"].values
     total_time = sum(step_durations)
     time_to_finish = sum(step_durations[:-1])
     time_to_start = step_durations[0] + accel_durations[1]
-    print("test length:", total_time)
+    print("\ntest length:", total_time)
     print("time when start:", time_to_start)
     print("time when finish:", time_to_finish)
     lower_bound = time_to_start
@@ -155,15 +146,15 @@ def rps_signal_zero_checker(rps_data: np.ndarray):
 
     print("_" * 60, "zero signal checker", "_" * 60)
     rms_values: list = []
-    for i in range(4):
-        rms = np.sqrt(np.mean(rps_data[:, i + 1] ** 2))
+    for column_index in range(len(rps_data[0, 1:])):
+        rms = np.sqrt(np.mean(rps_data[:, column_index + 1] ** 2))
         rms_values.append(rms)
     rps_signal_sensor_status = []
-    for i in range(len(rms_values)):
-        if rms_values[i] <= ZERO_RMS_UPPER_THRESHOLD:
-            rps_signal_sensor_status.append(1)
+    for rms_value in rms_values:
+        if rms_value <= ZEROCHECKER_LOW_RMS:
+            rps_signal_sensor_status.append("1")
         else:
-            rps_signal_sensor_status.append(0)
+            rps_signal_sensor_status.append("0")
     print("=" * 120, "\n")
     return rps_signal_sensor_status, rms_values
 
@@ -184,15 +175,15 @@ def rps_signal_5V_checker(rps_data: np.ndarray):
     """
     print("_" * 60, "5V signal checker", "_" * 60)
     mean_values = []
-    for i in range(4):
-        mean = np.mean(rps_data[:, i + 1])
+    for column_index in range(len(rps_data[0, 1:])):
+        mean = np.mean(rps_data[:, column_index + 1])
         mean_values.append(mean)
     rps_signal_sensor_status = []
-    for i in range(len(mean_values)):
-        if mean_values[i] <= SHORT_THRESHOLD_HIGH and mean_values[i] >= SHORT_THRESHOLD_LOW:
-            rps_signal_sensor_status.append(1)
+    for mean_value in mean_values:
+        if mean_value <= SHORTCHECKER_LOW and mean_value >= SHORTCHECKER_HIGH:
+            rps_signal_sensor_status.append("1")
         else:
-            rps_signal_sensor_status.append(0)
+            rps_signal_sensor_status.append("0")
     print("=" * 120, "\n")
     return rps_signal_sensor_status, mean_values
 
@@ -238,13 +229,11 @@ def remove_centre_data(time: np.ndarray, eol_test_id, test_type, gap_width) -> T
     step_durations: np.ndarray = step_dataframe["Duration_ms"].values / 1000
     accel_durations: np.ndarray = step_dataframe["Accel_Time_S"].values
     step_numbers = step_dataframe["Step_Number"].values
-    print(step_durations)
-    print(accel_durations)
     num_steps = len(step_numbers)
     halfway_point = int(num_steps / 2)
     upto_halfway_durations = np.sum(step_durations[0:halfway_point])
     halfway = upto_halfway_durations + accel_durations[halfway_point] / 2
-    print("Halfway time: ", halfway)
+    print("\nHalfway time: ", halfway)
     delta = gap_width / 2
     filtered_index_array_lower = np.where(time < (halfway - delta))[0]
     filtered_index_array_higher = np.where(time > (halfway + delta))[0]
@@ -266,10 +255,10 @@ def rps_signal_static_checker(rps_data: np.ndarray, test_type):
     Returns:
         tuple: A tuple containing two lists of strings indicating the status of each sensor.
     """
-    print("_" * 60, "average static checker", "_" * 60)
+    print("_" * 60, "static checker", "_" * 60)
     diff_arrays: list[np.ndarray] = []
-    for i in range(4):
-        diff_arr = np.diff(rps_data[:, i + 1])
+    for column_index in range(len(rps_data[0, 1:])):
+        diff_arr = np.diff(rps_data[:, column_index + 1])
         diff_arrays.append(diff_arr)
 
     fig5, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1)
@@ -280,9 +269,9 @@ def rps_signal_static_checker(rps_data: np.ndarray, test_type):
     fig5.suptitle("Differential of Signals")
 
     smoothed_arrays: list[np.ndarray] = []
-    for i in range(4):
-        spread_input = AVERAGING_SPREAD  # input top-hat width
-        smoothed_data = moving_average_convolve(rps_data[:, i + 1], spread_input)
+    for column_index in range(len(rps_data[0, 1:])):
+        spread_input = STATICCHECKER_TOPHAT_WIDTH  # input top-hat width
+        smoothed_data = moving_average_convolve(rps_data[:, column_index + 1], spread_input)
         smoothed_arrays.append(smoothed_data)
     smoothed_data = np.column_stack(
         (rps_data[:, 0], smoothed_arrays[0], smoothed_arrays[1], smoothed_arrays[2], smoothed_arrays[3])
@@ -318,10 +307,10 @@ def rps_signal_static_checker(rps_data: np.ndarray, test_type):
 
     non_normal_times = []
     smoothed_gapped_time = smoothed_gapped_data[:, 0]
-    for i in range(4):
+    for column_index in range(len(smoothed_gapped_data[0, 1:])):
         non_normal_index = np.where(
-            (smoothed_gapped_data[:, i + 1] > NORMAL_AVERAGE_HIGH)
-            | (smoothed_gapped_data[:, i + 1] < NORMAL_AVERAGE_LOW)
+            (smoothed_gapped_data[:, column_index + 1] > STATICCHECKER_HIGH_RESTVALUE)
+            | (smoothed_gapped_data[:, column_index + 1] < STATICCHECKER_LOW_RESTVALUE)
         )[0]
         if non_normal_index.size <= 1000:
             non_normal_times.append(np.array([0]))
@@ -330,8 +319,8 @@ def rps_signal_static_checker(rps_data: np.ndarray, test_type):
             non_normal_times.append(non_normal_time)
 
     differential_rms_values = []
-    for i in range(4):
-        rms_diff = np.sqrt(np.mean(diff_arrays[i] ** 2))
+    for diff_array in diff_arrays:
+        rms_diff = np.sqrt(np.mean(diff_array**2))
         differential_rms_values.append(rms_diff)
 
     average_status = []
@@ -347,20 +336,20 @@ def rps_signal_static_checker(rps_data: np.ndarray, test_type):
 
     differential_status = []
     for rms_diff in differential_rms_values:
-        if rms_diff > DIFFERENTIAL_RMS_LOW:
+        if rms_diff > STATICCHECKER_LOW_DIFFERENTIAL_RMS:
             differential_status.append(str(0))
         else:
             differential_status.append("Signal Appears Static")
 
     overall_results = []
-    for i in range(len(differential_status)):
-        if average_status[i] == 0 and differential_status[i] == 0:
+    for avg, diff in zip(average_status, differential_status):
+        if avg == str(0) and diff == str(0):
             overall_results.append(str(0))
-        elif average_status[i] != 0 and differential_status[i] != 0:
+        elif avg != str(0) and diff != str(0):
             overall_results.append("Static Signal")
-        elif average_status[i] != 0 and differential_status[i] == 0:
+        elif avg != str(0) and diff == str(0):
             overall_results.append("Appears Non Static but with Wrong Rest Value")
-        elif average_status[i] == 0 and differential_status[i] != 0:
+        elif avg == str(0) and diff != str(0):
             overall_results.append("Appears Static but with Good Rest Value")
         else:
             overall_results.append("Unexpected average_status and or differential_status")
@@ -514,7 +503,7 @@ def correct_order_checker(signal_list, time, period, sampling_time):
     cosn_start_line = np.array([cosn_sinp[2], cosn_cosp[2], cosn_sinn[2], cosn_cosn[2]])
 
     alignment_matrix = np.vstack((sinp_start_line, cosp_start_line, sinn_start_line, cosn_start_line))
-    alignment_matrix = np.where(alignment_matrix > OUT_OF_PHASE_SQUARE_ERROR_LOW, 1, 0)
+    alignment_matrix = np.where(alignment_matrix > ORDERCHECKER_SIGNAL_MSE_LOW, 1, 0)
     print("\nAlignment Matrix:\n", alignment_matrix)
 
     if np.all(alignment_matrix == 0):
@@ -538,19 +527,24 @@ def rps_order_checker(rps_data: np.ndarray):
         indicating the correct order of the sensors.
     """
     print("_" * 60, "order checker", "_" * 60)
-    time = rps_data[100000:100100, 0]  # np.linspace(25, 25.01, 100)
+    dataset_length = len(rps_data[:, 0])
+    quarter_length = int(dataset_length * ORDERCHECKER_SIGNAL_SELECT_FRACTION)
+    num_points_selected = 100
+    quarter_length_upper = quarter_length + num_points_selected
+    time = rps_data[quarter_length:quarter_length_upper, 0]
     sampling_time = np.mean(np.diff(time))
-    sinP = rps_data[100000:100100, 1]  # sinP
-    cosP = rps_data[100000:100100, 3]  # cosP
-    sinN = rps_data[100000:100100, 2]  # sinN
-    cosN = rps_data[100000:100100, 4]  # cosN
-    signals_list = [sinP, cosP, sinN, cosN]
-    sinP = signals_list[0]
-    cosP = signals_list[1]
-    sinN = signals_list[2]
-    cosN = signals_list[3]
-    signals_list = [sinP, cosP, sinN, cosN]
-    signal_names = ["sinP", "cosP", "sinN", "cosN"]
+    sinP = rps_data[quarter_length:quarter_length_upper, 1]  # sinP
+    cosP = rps_data[quarter_length:quarter_length_upper, 3]  # cosP
+    sinN = rps_data[quarter_length:quarter_length_upper, 2]  # sinN
+    cosN = rps_data[quarter_length:quarter_length_upper, 4]  # cosN
+    base_signals_list = [sinP, cosP, sinN, cosN]
+    # here to easily edit the order of the input signals manually
+    sinP = base_signals_list[0]
+    cosP = base_signals_list[1]
+    sinN = base_signals_list[2]
+    cosN = base_signals_list[3]
+    base_signals_list = [sinP, cosP, sinN, cosN]
+    signal_names = ["1", "2", "3", "4"]
     signals = np.column_stack((sinP, sinN, cosP, cosN))
 
     fig12, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1)
@@ -580,41 +574,50 @@ def rps_order_checker(rps_data: np.ndarray):
     # ax1.legend()
 
     correct_order = []
-    for permutation in itertools.permutations(signals_list):
+    for permutation in itertools.permutations(base_signals_list):
         if correct_order_checker(permutation, time, T, sampling_time):
-            correct_perm = [
-                signal_names[next(i for i, x in enumerate(signals_list) if np.array_equal(x, signal))]
-                for signal in permutation
-            ]
-            for i in correct_perm:
-                correct_order.append(i)
+            # returns true only when we have found the correct permutation of the signals
+            for signal_permutation in permutation:
+                """for each value in permutation, finds the matching signal in base_signals_list. It uses the index of
+                that to find the corresponding signal name in the signal_names list, and so appends a name to the
+                correct_order list. When it completely iterates across the permutation, the correct_order list will have
+                names in the same order as the permutation."""
+                correct_order.append(
+                    signal_names[
+                        next(
+                            position_index
+                            for position_index, signal_base in enumerate(base_signals_list)
+                            if np.array_equal(signal_base, signal_permutation)
+                        )
+                    ]
+                )
             break
 
     print("=" * 120, "\n")
 
-    if correct_order == ["sinP", "cosP", "sinN", "cosN"]:
-        rps_pinning_status = [0, 0, 0, 0]
+    if correct_order == ["1", "2", "3", "4"]:
+        rps_pinning_status = ["0", "0", "0", "0"]
     else:
-        rps_pinning_status = [1, 1, 1, 1]
+        rps_pinning_status = ["1", "1", "1", "1"]
     return rps_pinning_status, correct_order
 
 
 # %% Toplevel Runner
 if __name__ == "__main__":
     rps_data_np_V = rps_prefilter(df_filepath_V, eol_test_id_V, test_type_id_V)
-    # rps_zero_status = rps_signal_zero_checker(rps_data_np_V)
-    # rps_short_status = rps_sicogging_5V_checker(rps_data_np_V)
+    rps_zero_status = rps_signal_zero_checker(rps_data_np_V)
+    rps_short_status = rps_signal_5V_checker(rps_data_np_V)
     rps_static_status = rps_signal_static_checker(rps_data_np_V, test_type_id_V)
     rps_order_status = rps_order_checker(rps_data_np_V)
     print("_" * 60, "Results", "_" * 60)
-    # print(rps_zero_status)
-    # print(rps_short_status)
-    print(f"Overall Results: {rps_static_status[0]}")
-    print(f"Average Status: {rps_static_status[1]}")
-    print(f"Differential Status: {rps_static_status[2]}")
-    print(f"Non Normal Times: {rps_static_status[3]}")
-    print(f"Differential RMS values: {rps_static_status[4]}")
-    print(f"Pinning Status: {rps_order_status[0]}")
-    print(f"Current Order of Pinning: {rps_order_status[1]}")
+    print(f"Zero Signal Checker: Overall Results: {rps_zero_status[0]}")
+    print(f"Shorted Signal Checker: Overall Results: {rps_short_status[0]}")
+    print(f"Static Checker: Overall Results: {rps_static_status[0]}")
+    # print(f"Static Checker: Average Status: {rps_static_status[1]}")
+    # print(f"Static Checker: Differential Status: {rps_static_status[2]}")
+    # print(f"Static Checker: Non Normal Times: {rps_static_status[3]}")
+    # print(f"Static Checker: Differential RMS values: {rps_static_status[4]}")
+    print(f"Order Checker: Overall Results: {rps_order_status[0]}")
+    print(f"Order Checker: Correct order of signals: {rps_order_status[1]}")
     print("=" * 120, "\n")
-    plt.show()
+    # plt.show()
