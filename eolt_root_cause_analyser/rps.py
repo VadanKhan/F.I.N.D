@@ -1,5 +1,4 @@
 import itertools
-from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -31,7 +30,7 @@ STATICCHECKER_LOW_RESTVALUE = 2.4
 STATICCHECKER_HIGH_RESTVALUE = 2.6
 STATICCHECKER_LOW_DIFFERENTIAL_RMS = 0.05
 ORDERCHECKER_SIGNAL_MSE_LOW = 0.5
-ORDERCHECKER_SIGNAL_SELECT_FRACTION = 0.25
+ORDERCHECKER_POINTS = 100
 
 
 # %%
@@ -207,7 +206,7 @@ def moving_average_convolve(data: np.ndarray, spread: int):
     return averaged_data
 
 
-def remove_centre_data(time: np.ndarray, eol_test_id, test_type, gap_width) -> Tuple[np.ndarray, np.ndarray]:
+def remove_centre_data(time: np.ndarray, eol_test_id, test_type, gap_width):
     """Removes data from the center of a given time array.
 
     This function takes a 1D numpy array of time values, an eol_test_id, a test_type, and a gap width as input. It
@@ -512,31 +511,80 @@ def correct_order_checker(signal_list, time, period, sampling_time):
         return False
 
 
-def rps_order_checker(rps_data: np.ndarray):
+def select_step(time: np.ndarray, eol_test_id, test_type, step_input):
+    """Selects a specific step from the input time array based on the given step_input.
+
+    This function takes a 1D numpy array of time values, an eol_test_id, a test_type, and a step_input as input. It
+    returns an array containing the indices of the time values that are within the specified step.
+
+    Args:
+        time (np.ndarray): The time values of the input data.
+        eol_test_id (int): The eol_test_id of the motor.
+        test_type (str): The type of test being performed.
+        step_input (int): The step number to be selected.
+
+    Returns:
+        np.ndarray: An array containing the indices of the time values that are within the specified step.
+    """
+    motor_type = fetch_motor_details(eol_test_id)
+    step_dataframe: pd.DataFrame = fetch_step_timings(motor_type, test_type)
+    print(step_dataframe)
+    step_durations: np.ndarray = step_dataframe["Duration_ms"].values / 1000
+    accel_durations: np.ndarray = step_dataframe["Accel_Time_S"].values
+    step_numbers: np.ndarray = step_dataframe["Step_Number"].values
+    num_steps = len(step_numbers)
+    step_input = step_input - 1  # reset step_input to count from 0
+    if step_input + 1 > num_steps or step_input < 1:
+        print(f"Invalid step input requested, number of steps: {num_steps}")
+    elif step_input == 0:
+        lower_bound = accel_durations[step_input]
+        upper_bound = np.sum(step_durations[0 : (step_input + 1)])
+    elif step_input > 0:
+        lower_bound = np.sum(step_durations[0:step_input]) + accel_durations[step_input]
+        upper_bound = np.sum(step_durations[0 : (step_input + 1)])
+    else:
+        print("Invalid step input requested, please input integer >= 1")
+    filtered_index_array = np.where(time > lower_bound | time < upper_bound)[0]
+    return filtered_index_array
+
+
+def rps_order_checker(rps_data: np.ndarray, step_chosen, eol_test_id, test_type):
     """Checks the order of the given RPS signals.
 
-    This function takes a NumPy array containing RPS data as input and returns a list of integers indicating the status
-        of each sensor and a list of strings indicating the correct order of the sensors. If the sensors are in the
-        correct order, the status of each sensor is 0, otherwise it is 1.
+    This function takes a NumPy array containing RPS data, a step_chosen, an eol_test_id, and a test_type as input and
+    returns a list of integers indicating the status of each sensor and a list of strings indicating the correct order
+    of the sensors. If the sensors are in the correct order, the status of each sensor is 0, otherwise it is 1.
 
     Args:
         rps_data (np.ndarray): A NumPy array containing RPS data.
+        step_chosen (int): The step number chosen for analysis.
+        eol_test_id (int): The eol_test_id of the motor.
+        test_type (str): The type of test being performed.
 
     Returns:
         tuple: A tuple containing a list of integers indicating the status of each sensor and a list of strings
         indicating the correct order of the sensors.
     """
     print("_" * 60, "order checker", "_" * 60)
-    dataset_length = len(rps_data[:, 0])
-    quarter_length = int(dataset_length * ORDERCHECKER_SIGNAL_SELECT_FRACTION)
-    num_points_selected = 100
-    quarter_length_upper = quarter_length + num_points_selected
-    time = rps_data[quarter_length:quarter_length_upper, 0]
+    step_index = select_step(rps_data[:, 0], eol_test_id, test_type, step_chosen)
+    num_points_selected = ORDERCHECKER_POINTS
+    lower_bound = step_index[0]
+    upper_bound = step_index[0] + num_points_selected
+    try:
+        # code that may raise an IndexError
+        time = rps_data[lower_bound:upper_bound, 0]
+    except IndexError:
+        # code to handle the error
+        print(f"Index {lower_bound} to {upper_bound} is out of range for the array")
+        return ["selecting step error", "selecting step error"]
+    except Exception as e:
+        print(f"Unexpected selecting step error {e}")
+        return ["selecting step error", "selecting step error"]
     sampling_time = np.mean(np.diff(time))
-    sinP = rps_data[quarter_length:quarter_length_upper, 1]  # sinP
-    cosP = rps_data[quarter_length:quarter_length_upper, 3]  # cosP
-    sinN = rps_data[quarter_length:quarter_length_upper, 2]  # sinN
-    cosN = rps_data[quarter_length:quarter_length_upper, 4]  # cosN
+    sinP = rps_data[lower_bound:upper_bound, 1]  # sinP
+    cosP = rps_data[lower_bound:upper_bound, 3]  # cosP
+    sinN = rps_data[lower_bound:upper_bound, 2]  # sinN
+    cosN = rps_data[lower_bound:upper_bound, 4]  # cosN
     base_signals_list = [sinP, cosP, sinN, cosN]
     # here to easily edit the order of the input signals manually
     sinP = base_signals_list[0]
@@ -608,7 +656,7 @@ if __name__ == "__main__":
     rps_zero_status = rps_signal_zero_checker(rps_data_np_V)
     rps_short_status = rps_signal_5V_checker(rps_data_np_V)
     rps_static_status = rps_signal_static_checker(rps_data_np_V, test_type_id_V)
-    rps_order_status = rps_order_checker(rps_data_np_V)
+    rps_order_status = rps_order_checker(rps_data_np_V, 2, eol_test_id_V, test_type_id_V)
     print("_" * 60, "Results", "_" * 60)
     print(f"Zero Signal Checker: Overall Results: {rps_zero_status[0]}")
     print(f"Shorted Signal Checker: Overall Results: {rps_short_status[0]}")
