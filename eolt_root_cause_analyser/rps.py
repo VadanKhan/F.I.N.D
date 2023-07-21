@@ -29,7 +29,7 @@ STATICCHECKER_TOPHAT_WIDTH = 500
 STATICCHECKER_LOW_RESTVALUE = 2.4
 STATICCHECKER_HIGH_RESTVALUE = 2.6
 STATICCHECKER_LOW_DIFFERENTIAL_RMS = 0.05
-ORDERCHECKER_SIGNAL_MSE_LOW = 0.5
+ORDERCHECKER_SIGNAL_MSE_LOW = 1
 ORDERCHECKER_POINTS = 100
 
 
@@ -544,7 +544,9 @@ def select_step(time: np.ndarray, eol_test_id, test_type, step_input):
         upper_bound = np.sum(step_durations[0 : (step_input + 1)])
     else:
         print("Invalid step input requested, please input integer >= 1")
-    filtered_index_array = np.where(time > lower_bound | time < upper_bound)[0]
+    print(f"\nbounds: {lower_bound}, {upper_bound}")
+    filtered_index_array = np.where((time > lower_bound) & (time < upper_bound))[0]
+    print(f"\nindex array {filtered_index_array}, \nlength of array {len(filtered_index_array)}")
     return filtered_index_array
 
 
@@ -567,19 +569,22 @@ def rps_order_checker(rps_data: np.ndarray, step_chosen, eol_test_id, test_type)
     """
     print("_" * 60, "order checker", "_" * 60)
     step_index = select_step(rps_data[:, 0], eol_test_id, test_type, step_chosen)
+    step_points = len(step_index)
     num_points_selected = ORDERCHECKER_POINTS
-    lower_bound = step_index[0]
-    upper_bound = step_index[0] + num_points_selected
+    lower_bound = step_index[0] + int(step_points / 2)
+    print(lower_bound)
+    upper_bound = step_index[0] + int(step_points / 2) + num_points_selected
+    print(upper_bound)
     try:
         # code that may raise an IndexError
         time = rps_data[lower_bound:upper_bound, 0]
     except IndexError:
         # code to handle the error
         print(f"Index {lower_bound} to {upper_bound} is out of range for the array")
-        return ["selecting step error", "selecting step error"]
+        return ["selecting step error: ", "selecting step error"]
     except Exception as e:
         print(f"Unexpected selecting step error {e}")
-        return ["selecting step error", "selecting step error"]
+        return ["selecting step error: ", e]
     sampling_time = np.mean(np.diff(time))
     sinP = rps_data[lower_bound:upper_bound, 1]  # sinP
     cosP = rps_data[lower_bound:upper_bound, 3]  # cosP
@@ -590,7 +595,7 @@ def rps_order_checker(rps_data: np.ndarray, step_chosen, eol_test_id, test_type)
     sinP = base_signals_list[0]
     cosP = base_signals_list[1]
     sinN = base_signals_list[2]
-    cosN = base_signals_list[3]
+    cosN = base_signals_list[0]
     base_signals_list = [sinP, cosP, sinN, cosN]
     signal_names = ["1", "2", "3", "4"]
     signals = np.column_stack((sinP, sinN, cosP, cosN))
@@ -640,6 +645,8 @@ def rps_order_checker(rps_data: np.ndarray, step_chosen, eol_test_id, test_type)
                     ]
                 )
             break
+    if len(correct_order) == 0:
+        correct_order.append("Failed to find appropriate permutation")
 
     print("=" * 120, "\n")
 
@@ -656,7 +663,7 @@ if __name__ == "__main__":
     rps_zero_status = rps_signal_zero_checker(rps_data_np_V)
     rps_short_status = rps_signal_5V_checker(rps_data_np_V)
     rps_static_status = rps_signal_static_checker(rps_data_np_V, test_type_id_V)
-    rps_order_status = rps_order_checker(rps_data_np_V, 2, eol_test_id_V, test_type_id_V)
+    rps_order_status = rps_order_checker(rps_data_np_V, 2, eol_test_id_V, test_type_id_V)  # checking with step 2
     print("_" * 60, "Results", "_" * 60)
     print(f"Zero Signal Checker: Overall Results: {rps_zero_status[0]}")
     print(f"Shorted Signal Checker: Overall Results: {rps_short_status[0]}")
