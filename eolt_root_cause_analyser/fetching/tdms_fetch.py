@@ -92,21 +92,23 @@ def _apply_channel_map(
     return tdms_file
 
 
-def form_filepath(eol_test_id, test_type_id, test_id):
+def form_filepath(eol_test_id: int, test_type_id: int, test_id: int, levels_up: int) -> Path:
     """
     Forms a file path for a TDMS file.
 
-    This function takes an EOL test ID, a test type ID, and a test ID as arguments and returns a Path object
-        representing the full path to the TDMS file. The path is constructed by joining a filename formed from the input
-        arguments with a predefined base directory.
+    This function takes an EOL test ID, a test type ID, a test ID, and the number of levels up as arguments and returns
+        a Path object representing the full path to the TDMS file. The path is constructed by joining a filename formed
+        from the input arguments with a predefined base directory. If the desired directory is in two levels above the
+        calling directory, input 2 in levels_up.
 
     Args:
-        eol_test_id: The EOL test ID.
-        test_type_id: The test type ID.
-        test_id: The test ID.
+        eol_test_id (int): The EOL test ID.
+        test_type_id (int): The test type ID.
+        test_id (int): The test ID.
+        levels_up (int): The number of levels up from the parent directory of the script file.
 
     Returns:
-        A Path object representing the full path to the TDMS file.
+        Path: A Path object representing the full path to the TDMS file.
     """
 
     # form filename
@@ -116,14 +118,14 @@ def form_filepath(eol_test_id, test_type_id, test_id):
 
     parent_dir = Path(__file__).parent
 
-    # Get up 1 levels in the parent directory
-    one_levels_up = parent_dir.parents[0]
+    # Get up 2 levels in the parent directory
+    two_levels_up = parent_dir.parents[levels_up - 1]
 
     # Define the relative path to the target file
     relative_path = rf"Sample TDMS files\{filename}"
 
     # Join the parent directory with the relative path
-    tdms_file_path = one_levels_up / relative_path
+    tdms_file_path = two_levels_up / relative_path
 
     # Check if the target directory exists
     if not (tdms_file_path.exists()):
