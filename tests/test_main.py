@@ -6,9 +6,9 @@ import click.testing
 import eolt_root_cause_analyser.cli as cli
 import pandas as pd
 import pytest
-from eolt_root_cause_analyser.sql_fetch import fetch_eol
-from eolt_root_cause_analyser.tdms_fetch import _apply_channel_map
-from eolt_root_cause_analyser.tdms_fetch import read_tdms
+from eolt_root_cause_analyser.fetching.sql_fetch import fetch_eol
+from eolt_root_cause_analyser.fetching.tdms_fetch import _apply_channel_map
+from eolt_root_cause_analyser.fetching.tdms_fetch import read_tdms
 from nptdms import TdmsFile
 
 
