@@ -92,9 +92,9 @@ def rps_order_checker(rps_data: np.ndarray, step_chosen, eol_test_id, test_type)
     step_points = len(step_index)
     num_points_selected = ORDERCHECKER_POINTS
     lower_bound = step_index[0] + int(step_points / 2)
-    print(lower_bound)
+    # print(lower_bound)
     upper_bound = step_index[0] + int(step_points / 2) + num_points_selected
-    print(upper_bound)
+    # print(upper_bound)
     try:
         # code that may raise an IndexError
         time = rps_data[lower_bound:upper_bound, 0]

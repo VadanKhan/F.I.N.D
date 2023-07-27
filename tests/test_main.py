@@ -92,7 +92,7 @@ def test_read_tdms(monkeypatch):
         return df
 
     # Monkeypatch the _apply_channel_map function to return the mock function
-    monkeypatch.setattr("eolt_root_cause_analyser.tdms_fetch._apply_channel_map", mock_apply_channel_map)
+    monkeypatch.setattr("eolt_root_cause_analyser.fetching.tdms_fetch._apply_channel_map", mock_apply_channel_map)
 
     # Call the read_tdms function with a sample file path
     tdms_file_path = Path("test.tdms")

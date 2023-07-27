@@ -9,7 +9,7 @@ STATICCHECKER_HIGH_RESTVALUE = 2.6
 STATICCHECKER_LOW_DIFFERENTIAL_RMS = 0.05
 
 
-def rps_static_checker(rps_data: np.ndarray, test_type: str, eol_test_id: int):
+def rps_static_checker(rps_data: np.ndarray, eol_test_id, test_type):
     """Checks for static signals in the given RPS data.
 
     This function takes a NumPy array containing RPS data, a test_type, and an eol_test_id as input and returns two

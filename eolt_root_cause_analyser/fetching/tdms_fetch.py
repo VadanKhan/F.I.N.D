@@ -92,7 +92,7 @@ def _apply_channel_map(
     return tdms_file
 
 
-def form_filepath(eol_test_id: int, test_type_id: int, test_id: int, levels_up: int) -> Path:
+def form_filepath(eol_test_id, test_type_id, test_id, levels_up) -> Path:
     """
     Forms a file path for a TDMS file.
 

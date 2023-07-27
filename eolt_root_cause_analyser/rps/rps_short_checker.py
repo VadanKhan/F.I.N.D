@@ -4,7 +4,7 @@ SHORTCHECKER_LOW = 4.5
 SHORTCHECKER_HIGH = 5.5
 
 
-def rps_5V_checker(rps_data: np.ndarray):
+def rps_short_checker(rps_data: np.ndarray):
     """Checks for 5V signals in the given RPS data.
 
     This function takes a NumPy array containing RPS data as input and returns a list of strings indicating the status

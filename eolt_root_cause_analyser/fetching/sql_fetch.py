@@ -106,7 +106,6 @@ def select_step(time: np.ndarray, eol_test_id, test_type, step_input):
     """
     motor_type = fetch_motor_details(eol_test_id)
     step_dataframe: pd.DataFrame = fetch_step_timings(motor_type, test_type)
-    print(step_dataframe)
     step_durations: np.ndarray = step_dataframe["Duration_ms"].values / 1000
     accel_durations: np.ndarray = step_dataframe["Accel_Time_S"].values
     step_numbers: np.ndarray = step_dataframe["Step_Number"].values
@@ -122,7 +121,7 @@ def select_step(time: np.ndarray, eol_test_id, test_type, step_input):
         upper_bound = np.sum(step_durations[0 : (step_input + 1)])
     else:
         print("Invalid step input requested, please input integer >= 1")
-    print(f"\nbounds: {lower_bound}, {upper_bound}")
+    # print(f"\nbounds: {lower_bound}, {upper_bound}")
     filtered_index_array = np.where((time > lower_bound) & (time < upper_bound))[0]
-    print(f"\nindex array {filtered_index_array}, \nlength of array {len(filtered_index_array)}")
+    # print(f"\nindex array {filtered_index_array}, \nlength of array {len(filtered_index_array)}")
     return filtered_index_array
