@@ -30,7 +30,7 @@ def remove_centre_data(time: np.ndarray, eol_test_id, test_type, gap_width):
     halfway_point = int(num_steps / 2)
     upto_halfway_durations = np.sum(step_durations[0:halfway_point])
     halfway = upto_halfway_durations + accel_durations[halfway_point] / 2
-    print("\nHalfway time: ", halfway)
+    # print("\nHalfway time: ", halfway)
     delta = gap_width / 2
     filtered_index_array_lower = np.where(time < (halfway - delta))[0]
     filtered_index_array_higher = np.where(time > (halfway + delta))[0]
@@ -55,12 +55,12 @@ def edge_filtering(step_dataframe: pd.DataFrame, time: np.ndarray):
     """
     step_durations: np.ndarray = step_dataframe["Duration_ms"].values / 1000
     accel_durations: np.ndarray = step_dataframe["Accel_Time_S"].values
-    total_time = sum(step_durations)
+    # total_time = sum(step_durations)
     time_to_finish = sum(step_durations[:-1])
     time_to_start = step_durations[0] + accel_durations[1]
-    print("\ntest length:", total_time)
-    print("time when start:", time_to_start)
-    print("time when finish:", time_to_finish)
+    # print("\ntest length:", total_time)
+    # print("time when start:", time_to_start)
+    # print("time when finish:", time_to_finish)
     lower_bound = time_to_start
     upper_bound = time_to_finish
     filter_index_array = np.where((time >= lower_bound) & (time <= upper_bound))[0]
