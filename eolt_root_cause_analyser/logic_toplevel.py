@@ -47,4 +47,5 @@ def logic(failure_code, test_type, test_id):
     print("\n")
 
 
-logic("whatever", test_type_V, test_id_V)
+# to run code:
+# logic("whatever", test_type_V, test_id_V)
