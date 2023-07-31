@@ -135,3 +135,30 @@ def select_step(time: np.ndarray, eol_test_id, test_type, step_input):
     filtered_index_array = np.where((time > lower_bound) & (time < upper_bound))[0]
     # print(f"\nindex array {filtered_index_array}, \nlength of array {len(filtered_index_array)}")
     return filtered_index_array
+
+
+def fetch_past_failure_code(eol_test_id, test_type, test_id):
+    """Fetches failure codes from the database for the given test type, test id and EOL test id.
+
+    This function takes a test type, test id and EOL test id as input and returns a DataFrame containing the failure
+        codes.
+
+    Args:
+        test_type (str): The type of the test to fetch failure codes for.
+        test_id (int): The id of the test to fetch failure codes for.
+        eol_test_id (int): The EOL test id to fetch failure codes for.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the failure codes.
+    """
+    connection = eolt_connect()
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        failure_code_df = pd.read_sql_query(
+            f"SELECT Failure_Codes FROM dbo.Test_{test_type} WHERE Test_ID={test_id} AND EOL_Test_ID={eol_test_id}",
+            connection,
+        )
+        failure_code = failure_code_df.iloc[0, 0]
+
+    connection.close()
+    return failure_code
