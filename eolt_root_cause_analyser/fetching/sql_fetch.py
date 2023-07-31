@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import pandas as pd
 import pyodbc
@@ -35,7 +37,11 @@ def fetch_eol(test_id, test_type_id):
         int or Error: The fetched EOL_Test_ID or an error object if an error occurred.
     """
     connection = eolt_connect()
-    eol_test_id = pd.read_sql_query(f"SELECT EOL_Test_ID from Test_{test_type_id} WHERE Test_ID={test_id}", connection)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        eol_test_id = pd.read_sql_query(
+            f"SELECT EOL_Test_ID from Test_{test_type_id} WHERE Test_ID={test_id}", connection
+        )
     eol_test_id_value = eol_test_id.iloc[0, 0]
     # print(eol_test_id)
 
@@ -53,7 +59,9 @@ def fetch_motor_details(eol_test_id: int):
         int or Error: The fetched motor type or an error object if an error occurred.
     """
     connection = eolt_connect()
-    motor_type_db = pd.read_sql_query(f"SELECT Motor_Type FROM EOLTest WHERE EOL_Test_ID={eol_test_id}", connection)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        motor_type_db = pd.read_sql_query(f"SELECT Motor_Type FROM EOLTest WHERE EOL_Test_ID={eol_test_id}", connection)
     motor_type = motor_type_db.iloc[0, 0]
     # print(eol_test_id)
 
@@ -75,15 +83,17 @@ def fetch_step_timings(motor_type, test_type):
         pd.DataFrame: A DataFrame containing the step number, duration, and acceleration time for each step in the test.
     """
     connection = eolt_connect()
-    motor_type_df = pd.read_sql_query(
-        f"""Select Step_Number, Duration_ms, Accel_Time_S
-        FROM StepDescription_{test_type}
-        INNER JOIN DriveCycleStep_{test_type} ON Step_ID = Step_Description_ID
-        INNER JOIN DriveCycle_{test_type} ON Cycle_ID = Drive_Cycle_ID
-        INNER JOIN MotorTypes ON Drive_Cycle_ID = {test_type}_Cycle_ID
-        WHERE Motor_Type_ID='{motor_type}' """,
-        connection,
-    )
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        motor_type_df = pd.read_sql_query(
+            f"""Select Step_Number, Duration_ms, Accel_Time_S
+            FROM StepDescription_{test_type}
+            INNER JOIN DriveCycleStep_{test_type} ON Step_ID = Step_Description_ID
+            INNER JOIN DriveCycle_{test_type} ON Cycle_ID = Drive_Cycle_ID
+            INNER JOIN MotorTypes ON Drive_Cycle_ID = {test_type}_Cycle_ID
+            WHERE Motor_Type_ID='{motor_type}' """,
+            connection,
+        )
 
     connection.close()
     return motor_type_df

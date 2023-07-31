@@ -869,6 +869,21 @@ url = "http://10.1.255.13:3141/root/dev/+simple"
 reference = "yasa"
 
 [[package]]
+name = "fpdf"
+version = "1.7.2"
+description = "Simple PDF generation for Python"
+optional = false
+python-versions = "*"
+files = [
+    {file = "fpdf-1.7.2.tar.gz", hash = "sha256:125840783289e7d12552b1e86ab692c37322e7a65b96a99e0ea86cca041b6779"},
+]
+
+[package.source]
+type = "legacy"
+url = "http://10.1.255.13:3141/root/dev/+simple"
+reference = "yasa"
+
+[[package]]
 name = "furo"
 version = "2022.9.29"
 description = "A clean customisable Sphinx documentation theme."
@@ -3500,4 +3515,4 @@ reference = "yasa"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "b6bfd08930afa222c09b0a5d6272c368897bc46cd16166b0ccf5b8f66b878b5f"
+content-hash = "9167bec8ba714028c7057ff2773df73ffc6d02c1ad05d71d280a7450f4d49981"

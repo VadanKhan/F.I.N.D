@@ -2,11 +2,11 @@ import itertools
 
 import matplotlib.pyplot as plt
 import numpy as np
-from eolt_root_cause_analyser.data_analysis.data_analysis import align_signals
-from eolt_root_cause_analyser.data_analysis.data_analysis import calculate_frequencies
+from eolt_root_cause_analyser.data_processing.data_processing import align_signals
+from eolt_root_cause_analyser.data_processing.data_processing import calculate_frequencies
 from eolt_root_cause_analyser.fetching.sql_fetch import select_step
 
-ORDERCHECKER_SIGNAL_MSE_LOW = 1.5
+ORDERCHECKER_SIGNAL_MSE_LOW = 1.0
 ORDERCHECKER_POINTS = 200
 
 
@@ -33,32 +33,32 @@ def correct_order_checker(signal_list, time, period, sampling_time):
     cosN = signal_list[3]
 
     # check sinP shifts correctly
-    sinp_sinp = np.array([0, 0, 0])
+    sinp_sinp = 0
     sinp_cosp = align_signals(cosP, sinP, period, 0.25, sampling_time)
     sinp_sinn = align_signals(sinN, sinP, period, 0.5, sampling_time)
     sinp_cosn = align_signals(cosN, sinP, period, 0.75, sampling_time)
-    sinp_start_line = np.array([sinp_sinp[2], sinp_cosp[2], sinp_sinn[2], sinp_cosn[2]])
+    sinp_start_line = np.array([sinp_sinp, sinp_cosp, sinp_sinn, sinp_cosn])
 
     # check cosp shifts correctly
     cosp_sinp = align_signals(sinP, cosP, period, 0.75, sampling_time)
-    cosp_cosp = np.array([0, 0, 0])
+    cosp_cosp = 0
     cosp_sinn = align_signals(sinN, cosP, period, 0.25, sampling_time)
     cosp_cosn = align_signals(cosN, cosP, period, 0.5, sampling_time)
-    cosp_start_line = np.array([cosp_sinp[2], cosp_cosp[2], cosp_sinn[2], cosp_cosn[2]])
+    cosp_start_line = np.array([cosp_sinp, cosp_cosp, cosp_sinn, cosp_cosn])
 
     # check sinn shifts correctly
     sinn_sinp = align_signals(sinP, sinN, period, 0.5, sampling_time)
     sinn_cosp = align_signals(cosP, sinN, period, 0.75, sampling_time)
-    sinn_sinn = np.array([0, 0, 0])
+    sinn_sinn = 0
     sinn_cosn = align_signals(cosN, sinN, period, 0.25, sampling_time)
-    sinn_start_line = np.array([sinn_sinp[2], sinn_cosp[2], sinn_sinn[2], sinn_cosn[2]])
+    sinn_start_line = np.array([sinn_sinp, sinn_cosp, sinn_sinn, sinn_cosn])
 
     # check cosnn shifts correctly
     cosn_sinp = align_signals(sinP, cosN, period, 0.25, sampling_time)
     cosn_cosp = align_signals(cosP, cosN, period, 0.5, sampling_time)
     cosn_sinn = align_signals(sinN, cosN, period, 0.75, sampling_time)
-    cosn_cosn = np.array([0, 0, 0])
-    cosn_start_line = np.array([cosn_sinp[2], cosn_cosp[2], cosn_sinn[2], cosn_cosn[2]])
+    cosn_cosn = 0
+    cosn_start_line = np.array([cosn_sinp, cosn_cosp, cosn_sinn, cosn_cosn])
 
     alignment_matrix = np.vstack((sinp_start_line, cosp_start_line, sinn_start_line, cosn_start_line))
     alignment_matrix = np.where(alignment_matrix > ORDERCHECKER_SIGNAL_MSE_LOW, 1, 0)

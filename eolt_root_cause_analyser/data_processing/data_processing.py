@@ -112,4 +112,4 @@ def align_signals(main_signal, move_signal, period, expected_phase_shift, sampli
     # Calculate mean squared error between shifted signals, ignoring rolled values
     mse = np.mean((main_signal[time_shift:] - shifted_signal[time_shift:]) ** 2)
 
-    return main_signal[time_shift:], shifted_signal[time_shift:], mse
+    return mse

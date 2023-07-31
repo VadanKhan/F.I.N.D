@@ -19,6 +19,7 @@ mysql-connector = "^2.2.9"
 pyodbc = "^4.0.39"
 yasa-file-io = "^23.4.13"
 matplotlib = "^3.7.1"
+fpdf = "^1.7.2"
 
 [tool.poetry.scripts]
 root_cause = "eolt_root_cause_analyser.cli:begin"

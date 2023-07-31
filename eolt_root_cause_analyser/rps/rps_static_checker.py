@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from eolt_root_cause_analyser.data_analysis.data_analysis import moving_average_convolve
+from eolt_root_cause_analyser.data_processing.data_processing import moving_average_convolve
 from eolt_root_cause_analyser.fetching.data_trimming import remove_centre_data
 
 STATICCHECKER_TOPHAT_WIDTH = 500

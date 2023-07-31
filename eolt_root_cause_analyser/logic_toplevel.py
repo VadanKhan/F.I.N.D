@@ -43,9 +43,16 @@ def logic(failure_code, test_type, test_id):
     # print(f"Static Checker: Non Normal Times: {rps_static_status[3]}")
     # print(f"Static Checker: Differential RMS values: {rps_static_status[4]}")
     print(f"Order Checker: Overall Results: {results_order_checker[0]}")
-    print(f"Order Checker: Correct order of signals: {results_order_checker[1]}")
+    # print(f"Order Checker: Correct order of signals: {results_order_checker[1]}")
+    status_dict = {
+        "Zero Signal Checker": results_zero_checker[0],
+        "Shorted Signal Checker": results_short_checker[0],
+        "Static Checker": results_static_checker[0],
+        "Order Checker": results_order_checker[0],
+    }
+
     print("\n")
 
 
 # to run code:
-# logic("whatever", test_type_V, test_id_V)
+logic("whatever", test_type_V, test_id_V)
