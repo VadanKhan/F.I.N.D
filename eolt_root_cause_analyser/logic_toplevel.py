@@ -1,8 +1,9 @@
 from eolt_root_cause_analyser.fetching.sql_fetch import fetch_eol
-from eolt_root_cause_analyser.rps.rps_toplevel import rps_order_checker_class
-from eolt_root_cause_analyser.rps.rps_toplevel import rps_short_checker_class
-from eolt_root_cause_analyser.rps.rps_toplevel import rps_static_checker_class
-from eolt_root_cause_analyser.rps.rps_toplevel import rps_zero_checker_class
+from eolt_root_cause_analyser.results import results
+from eolt_root_cause_analyser.rps.rps_toplevel import RpsOrder
+from eolt_root_cause_analyser.rps.rps_toplevel import RpsShort
+from eolt_root_cause_analyser.rps.rps_toplevel import RpsStatic
+from eolt_root_cause_analyser.rps.rps_toplevel import RpsZero
 
 # from eolt_root_cause_analyser.initial_plots import initial_plots
 
@@ -14,23 +15,25 @@ eol_test_id_V = good_rps_test[0]
 test_type_V = good_rps_test[1]
 test_id_V = good_rps_test[2]
 
+SAVING_PATH = 0  # set to 0 if not wanting to call remote saving
+
 
 def logic(failure_code, test_type, test_id):
     eol_test_id = fetch_eol(test_id, test_type)
 
-    zero_checker = rps_zero_checker_class(eol_test_id, test_type, test_id)
+    zero_checker = RpsZero(eol_test_id, test_type, test_id)
     results_zero_checker = zero_checker.analyse()
     zero_checker.report(results_zero_checker)
 
-    short_checker = rps_short_checker_class(eol_test_id, test_type, test_id)
+    short_checker = RpsShort(eol_test_id, test_type, test_id)
     results_short_checker = short_checker.analyse()
     short_checker.report(results_short_checker)
 
-    static_checker = rps_static_checker_class(eol_test_id, test_type, test_id)
+    static_checker = RpsStatic(eol_test_id, test_type, test_id)
     results_static_checker = static_checker.analyse()
     static_checker.report(results_static_checker)
 
-    order_checker = rps_order_checker_class(eol_test_id, test_type, test_id)
+    order_checker = RpsOrder(eol_test_id, test_type, test_id)
     results_order_checker = order_checker.analyse(2)
     order_checker.report(results_order_checker)
 
@@ -50,6 +53,7 @@ def logic(failure_code, test_type, test_id):
         "Static Checker": results_static_checker[0],
         "Order Checker": results_order_checker[0],
     }
+    results(status_dict, eol_test_id, test_type, test_id, SAVING_PATH)
 
     print("\n")
 

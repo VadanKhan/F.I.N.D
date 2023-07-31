@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from eolt_root_cause_analyser.class_setup import specific_test
+from eolt_root_cause_analyser.class_setup import SpecificTest
 from eolt_root_cause_analyser.fetching.data_trimming import edge_filtering
 from eolt_root_cause_analyser.fetching.sql_fetch import fetch_motor_details
 from eolt_root_cause_analyser.fetching.sql_fetch import fetch_step_timings
@@ -22,7 +22,7 @@ def rps_prefilter(self):
         test ID and test type. The function returns a NumPy array containing the filtered RPS data.
 
     Args:
-        self: from the specific_test class.
+        self: from the SpecificTest class.
 
     Returns:
         np.ndarray: A NumPy array containing the filtered RPS data.
@@ -73,10 +73,10 @@ def rps_prefilter(self):
     return rps_data_np
 
 
-setattr(specific_test, "rps_prefilter", rps_prefilter)
+setattr(SpecificTest, "rps_prefilter", rps_prefilter)
 
 
-class rps_zero_checker_class(specific_test):
+class RpsZero(SpecificTest):
     def analyse(self):
         rps_data = self.rps_prefilter()
         return rps_zero_checker(rps_data)
@@ -86,7 +86,7 @@ class rps_zero_checker_class(specific_test):
         return None
 
 
-class rps_short_checker_class(specific_test):
+class RpsShort(SpecificTest):
     def analyse(self):
         rps_data = self.rps_prefilter()
         return rps_short_checker(rps_data)
@@ -96,7 +96,7 @@ class rps_short_checker_class(specific_test):
         return None
 
 
-class rps_static_checker_class(specific_test):
+class RpsStatic(SpecificTest):
     def analyse(self):
         rps_data = self.rps_prefilter()
         return rps_static_checker(rps_data, self.eol_test_id, self.test_type)
@@ -106,7 +106,7 @@ class rps_static_checker_class(specific_test):
         return None
 
 
-class rps_order_checker_class(specific_test):
+class RpsOrder(SpecificTest):
     def analyse(self, step_chosen):
         rps_data = self.rps_prefilter()
         return rps_order_checker(rps_data, step_chosen, self.eol_test_id, self.test_type)
