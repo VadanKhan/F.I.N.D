@@ -1,9 +1,9 @@
 from eolt_root_cause_analyser.fetching.sql_fetch import fetch_eol
 from eolt_root_cause_analyser.results import results
-from eolt_root_cause_analyser.rps.rps_toplevel import RpsOrder
-from eolt_root_cause_analyser.rps.rps_toplevel import RpsShort
-from eolt_root_cause_analyser.rps.rps_toplevel import RpsStatic
-from eolt_root_cause_analyser.rps.rps_toplevel import RpsZero
+from eolt_root_cause_analyser.rps.rps_order_checker import RpsOrder
+from eolt_root_cause_analyser.rps.rps_short_checker import RpsShort
+from eolt_root_cause_analyser.rps.rps_static_checker import RpsStatic
+from eolt_root_cause_analyser.rps.rps_zero_checker import RpsZero
 
 # from eolt_root_cause_analyser.initial_plots import initial_plots
 
