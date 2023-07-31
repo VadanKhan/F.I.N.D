@@ -9,10 +9,11 @@ from eolt_root_cause_analyser.fetching.tdms_fetch import get_time_series_data
 
 
 class FailureModeChecker:
-    def __init__(self, eol_test_id, test_type, test_id):
+    def __init__(self, eol_test_id, test_type, test_id, failure_code):
         self.eol_test_id = eol_test_id
         self.test_type = test_type
         self.test_id = test_id
+        self.failure_code = failure_code
 
     def rps_prefilter(self):
         """Filters RPS data based on the start and end times of a test.
@@ -51,21 +52,23 @@ class FailureModeChecker:
         filtered_index_array = edge_filtering(step_details_df, time_np)
         rps_data_np = rps_data_raw_np[filtered_index_array]
 
-        fig8, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1)
-        ax1.plot(rps_data_np[:, 0], rps_data_np[:, 1])
-        ax2.plot(rps_data_np[:, 0], rps_data_np[:, 2])
-        ax3.plot(rps_data_np[:, 0], rps_data_np[:, 3])
-        ax4.plot(rps_data_np[:, 0], rps_data_np[:, 4])
-        ax5.plot(rps_data_np[:, 0], rps_data_np[:, 1], label="SinP")
-        ax5.plot(rps_data_np[:, 0], rps_data_np[:, 2], label="SinN")
-        ax5.plot(rps_data_np[:, 0], rps_data_np[:, 3], label="CosP")
-        ax5.plot(rps_data_np[:, 0], rps_data_np[:, 4], label="CosN")
-        ax1.set_ylim(0, 5)
-        ax2.set_ylim(0, 5)
-        ax3.set_ylim(0, 5)
-        ax4.set_ylim(0, 5)
-        ax5.set_ylim(0, 5)
-        ax5.legend()
-        fig8.suptitle("Input (Selected) Signals")
+        # failurecode_step = int(str(self.failure_code)[1])
+
+        # fig8, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1)
+        # ax1.plot(rps_data_np[:, 0], rps_data_np[:, 1])
+        # ax2.plot(rps_data_np[:, 0], rps_data_np[:, 2])
+        # ax3.plot(rps_data_np[:, 0], rps_data_np[:, 3])
+        # ax4.plot(rps_data_np[:, 0], rps_data_np[:, 4])
+        # ax5.plot(rps_data_np[:, 0], rps_data_np[:, 1], label="SinP")
+        # ax5.plot(rps_data_np[:, 0], rps_data_np[:, 2], label="SinN")
+        # ax5.plot(rps_data_np[:, 0], rps_data_np[:, 3], label="CosP")
+        # ax5.plot(rps_data_np[:, 0], rps_data_np[:, 4], label="CosN")
+        # ax1.set_ylim(0, 5)
+        # ax2.set_ylim(0, 5)
+        # ax3.set_ylim(0, 5)
+        # ax4.set_ylim(0, 5)
+        # ax5.set_ylim(0, 5)
+        # ax5.legend()
+        # fig8.suptitle("Input (Selected) Signals")
 
         return rps_data_np

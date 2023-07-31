@@ -1,11 +1,12 @@
 import itertools
 
-import matplotlib.pyplot as plt
 import numpy as np
 from eolt_root_cause_analyser.class_setup import FailureModeChecker
 from eolt_root_cause_analyser.data_processing.data_processing import calculate_frequencies
 from eolt_root_cause_analyser.data_processing.data_processing import correct_order_checker
 from eolt_root_cause_analyser.fetching.sql_fetch import select_step
+
+# import matplotlib.pyplot as plt
 
 
 ORDERCHECKER_POINTS = 200
@@ -50,30 +51,24 @@ class RpsOrder(FailureModeChecker):
             print(f"Unexpected selecting step error {e}")
             return ["selecting step error: ", e]
         sampling_time = np.mean(np.diff(time))
-        sinP = rps_data[lower_bound:upper_bound, 1]  # sinP
-        cosP = rps_data[lower_bound:upper_bound, 3]  # cosP
-        sinN = rps_data[lower_bound:upper_bound, 2]  # sinN
-        cosN = rps_data[lower_bound:upper_bound, 4]  # cosN
-        base_signals_list = [sinP, cosP, sinN, cosN]
-        # here to easily edit the order of the input signals manually
-        sinP = base_signals_list[0]
-        cosP = base_signals_list[1]
-        sinN = base_signals_list[2]
-        cosN = base_signals_list[3]
+        sinP = rps_data[lower_bound:upper_bound, 1]  # sinP from column 1
+        cosP = rps_data[lower_bound:upper_bound, 2]  # cosP from column 3
+        sinN = rps_data[lower_bound:upper_bound, 3]  # sinN from column 2
+        cosN = rps_data[lower_bound:upper_bound, 4]  # cosN from column 4
         base_signals_list = [sinP, cosP, sinN, cosN]
         signal_names = ["1", "2", "3", "4"]
         signals = np.column_stack((sinP, sinN, cosP, cosN))
 
-        fig12, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1)
-        ax1.plot(time, sinP)
-        ax2.plot(time, cosP)
-        ax3.plot(time, sinN)
-        ax4.plot(time, cosN)
-        ax5.plot(time, sinP, label="SinP")
-        ax5.plot(time, cosP, label="CosP")
-        ax5.plot(time, sinN, label="SinN")
-        ax5.plot(time, cosN, label="CosN")
-        plt.legend()
+        # fig12, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1)
+        # ax1.plot(time, sinP)
+        # ax2.plot(time, cosP)
+        # ax3.plot(time, sinN)
+        # ax4.plot(time, cosN)
+        # ax5.plot(time, sinP, label="SinP")
+        # ax5.plot(time, cosP, label="CosP")
+        # ax5.plot(time, sinN, label="SinN")
+        # ax5.plot(time, cosN, label="CosN")
+        # plt.legend()
 
         try:
             frequencies = calculate_frequencies(time, signals)
@@ -85,39 +80,19 @@ class RpsOrder(FailureModeChecker):
         # main_signal, shifted_signal, error = align_signals(cosN, cosP, T, 0.5, sampling_time)
         # print("\nPlotting Error: ", error, "\n")
 
-        # fig14, (ax1) = plt.subplots()
-        # ax1.plot(time[-len(main_signal) :], main_signal, label="main")
-        # ax1.plot(time[-len(shifted_signal) :], shifted_signal, label="shifted")
-        # ax1.legend()
-
+        signals_dict = dict(zip(signal_names, base_signals_list))
         correct_order = []
-        for permutation in itertools.permutations(base_signals_list):
-            if correct_order_checker(permutation, ORDERCHECKER_SIGNAL_MSE_LOW, T, sampling_time):
-                # returns true only when we have found the correct permutation of the signals
-                for signal_permutation in permutation:
-                    """for each value in permutation, finds the matching signal in base_signals_list. It uses the index
-                    of that to find the corresponding signal name in the signal_names list, and so appends a name to the
-                    correct_order list. When it completely iterates across the permutation, the correct_order list will
-                    have names in the same order as the permutation."""
-                    correct_order.append(
-                        signal_names[
-                            next(
-                                position_index
-                                for position_index, signal_base in enumerate(base_signals_list)
-                                if np.array_equal(signal_base, signal_permutation)
-                            )
-                        ]
-                    )
+        for permutation in itertools.permutations(signals_dict.items()):
+            if correct_order_checker(
+                [signal for name, signal in permutation], ORDERCHECKER_SIGNAL_MSE_LOW, T, sampling_time
+            ):
+                for name, signal in permutation:
+                    correct_order.append(name)
                 break
-        if len(correct_order) == 0:
-            correct_order.append("Failed to find appropriate permutation")
 
         print("=" * 120, "\n")
 
-        if correct_order == ["1", "2", "3", "4"]:
-            rps_pinning_status = ["0", "0", "0", "0"]
-        else:
-            rps_pinning_status = ["1", "1", "1", "1"]
+        rps_pinning_status = ["1" if a != b else "0" for a, b in zip(correct_order, ["1", "2", "3", "4"])]
         return rps_pinning_status, correct_order
 
     def analyse(self, step_chosen):
