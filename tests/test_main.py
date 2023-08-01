@@ -1,21 +1,15 @@
 """Test cases for the __main__ module."""
-import sys
 from pathlib import Path
 from unittest import mock
-from unittest.mock import MagicMock
-from unittest.mock import patch
 
 import click.testing
 import eolt_root_cause_analyser.cli as cli
 import pandas as pd
 import pytest
-from eolt_root_cause_analyser.sql_fetch import fetch_eol
-from eolt_root_cause_analyser.tdms_fetch import _apply_channel_map
-from eolt_root_cause_analyser.tdms_fetch import form_filename_tdms
-from eolt_root_cause_analyser.tdms_fetch import form_filepath
-from eolt_root_cause_analyser.tdms_fetch import read_tdms
+from eolt_root_cause_analyser.fetching.sql_fetch import fetch_eol
+from eolt_root_cause_analyser.fetching.tdms_fetch import _apply_channel_map
+from eolt_root_cause_analyser.fetching.tdms_fetch import read_tdms
 from nptdms import TdmsFile
-from pandas import DataFrame
 
 
 def test_begin_correct_printing():
@@ -75,48 +69,8 @@ def test_fetch_eol_error(monkeypatch):
 
     # Call the function and assert that an exception is raised
     with pytest.raises(Exception) as excinfo:
-        result = fetch_eol(1, 2)
+        fetch_eol(1, 2)
     assert str(excinfo.value) == "Test error"
-
-
-def test_form_filename_tdms():
-    """Tests the form_filename_tdms function by calling it with test arguments and asserting that the result is the expected filename."""
-    # Call the function with test arguments
-    result = form_filename_tdms(1, 2, 3)
-
-    # Assert that the result is the expected filename
-    assert result == "3_2_1.tdms"
-
-
-def test_form_filepath():
-    with patch.object(sys.modules[__name__], "__file__", "C:/Users/Vadan.Khan/Documents/Project/test/form_filepath.py"):
-        result = form_filepath("test.tdms")
-        expected = Path("C:/Users/Vadan.Khan/Documents/Project/Sample TDMS files/test.tdms")
-        assert result == expected
-
-
-# def test_read_tdms(monkeypatch):
-#     """Tests the read_tdms function using monkeypatching to mock the yasa_file_io.tdms.read_tdms_as_dataframe function.
-#     Checks that yasa-file-io can indeed read a tdms to a pandas dataframe.
-
-#     Args:
-#         monkeypatch: The pytest monkeypatch fixture, used to temporarily replace the yasa_file_io.tdms.read_tdms_as_dataframe function with a mock function that returns a predefined DataFrame.
-
-#     """
-#     # Create a mock DataFrame to return from the patched function
-#     mock_df = DataFrame({"A": [1, 2], "B": [3, 4]})
-
-#     # Patch the yasa_file_io.tdms.read_tdms_as_dataframe function to return the mock DataFrame
-#     monkeypatch.setattr(
-#         "yasa_file_io.tdms.read_tdms_as_dataframe",
-#         MagicMock(return_value=mock_df),
-#     )
-
-#     # Call the function with a test filename
-#     result = read_tdms("test.tdms")
-
-#     # Assert that the result is equal to the mock DataFrame
-#     assert result.equals(mock_df)
 
 
 def test_read_tdms(monkeypatch):
@@ -138,7 +92,7 @@ def test_read_tdms(monkeypatch):
         return df
 
     # Monkeypatch the _apply_channel_map function to return the mock function
-    monkeypatch.setattr("eolt_root_cause_analyser.tdms_fetch._apply_channel_map", mock_apply_channel_map)
+    monkeypatch.setattr("eolt_root_cause_analyser.fetching.tdms_fetch._apply_channel_map", mock_apply_channel_map)
 
     # Call the read_tdms function with a sample file path
     tdms_file_path = Path("test.tdms")
