@@ -21,20 +21,20 @@ SAVING_PATH = 0  # set to 0 if not wanting to call remote saving
 def logic(failure_code, test_type, test_id):
     eol_test_id = fetch_eol(test_id, test_type)
 
-    zero_checker = RpsZero(eol_test_id, test_type, test_id)
+    zero_checker = RpsZero(eol_test_id, test_type, test_id, failure_code)
     results_zero_checker = zero_checker.analyse()
     zero_checker.report(results_zero_checker)
 
-    short_checker = RpsShort(eol_test_id, test_type, test_id)
+    short_checker = RpsShort(eol_test_id, test_type, test_id, failure_code)
     results_short_checker = short_checker.analyse()
     short_checker.report(results_short_checker)
 
-    static_checker = RpsStatic(eol_test_id, test_type, test_id)
+    static_checker = RpsStatic(eol_test_id, test_type, test_id, failure_code)
     results_static_checker = static_checker.analyse()
     static_checker.report(results_static_checker)
 
-    order_checker = RpsOrder(eol_test_id, test_type, test_id)
-    results_order_checker = order_checker.analyse(2)
+    order_checker = RpsOrder(eol_test_id, test_type, test_id, failure_code)
+    results_order_checker = order_checker.analyse()
     order_checker.report(results_order_checker)
 
     print("_" * 60, "Analysis Results", "_" * 60)
@@ -59,4 +59,4 @@ def logic(failure_code, test_type, test_id):
 
 
 # to run code:
-logic("whatever", test_type_V, test_id_V)
+logic(12019, test_type_V, test_id_V)

@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from eolt_root_cause_analyser.fetching.sql_fetch import fetch_motor_details
 from eolt_root_cause_analyser.fetching.sql_fetch import fetch_step_timings
 
 
@@ -21,8 +20,7 @@ def remove_centre_data(time: np.ndarray, eol_test_id, test_type, gap_width):
         tuple: A tuple containing two arrays: one with the indices of the time values that are below the lower bound
             of the gap, and one with the indices of the time values that are above the upper bound of the gap.
     """
-    motor_type = fetch_motor_details(eol_test_id)
-    step_dataframe: pd.DataFrame = fetch_step_timings(motor_type, test_type)
+    step_dataframe: pd.DataFrame = fetch_step_timings(eol_test_id, test_type)
     step_durations: np.ndarray = step_dataframe["Duration_ms"].values / 1000
     accel_durations: np.ndarray = step_dataframe["Accel_Time_S"].values
     step_numbers = step_dataframe["Step_Number"].values
@@ -65,3 +63,40 @@ def edge_filtering(step_dataframe: pd.DataFrame, time: np.ndarray):
     upper_bound = time_to_finish
     filter_index_array = np.where((time >= lower_bound) & (time <= upper_bound))[0]
     return filter_index_array
+
+
+def select_step(step_dataframe: pd.DataFrame, time: np.ndarray, step_input):
+    """Selects a specific step from the input time array based on the given step_input.
+
+    This function takes a 1D numpy array of time values, an eol_test_id, a test_type, and a step_input as input. It
+    returns an array containing the indices of the time values that are within the specified step.
+
+    Args:
+        step_dataframe (pd.DataFrame): A DataFrame containing step information, including 'Duration_ms' and
+            'Accel_
+            Time_S' columns.
+        time (np.ndarray): The time values of the input data.
+        step_input (int): The step number to be selected.
+
+    Returns:
+        np.ndarray: An array containing the indices of the time values that are within the specified step.
+    """
+    step_durations: np.ndarray = step_dataframe["Duration_ms"].values / 1000
+    accel_durations: np.ndarray = step_dataframe["Accel_Time_S"].values
+    step_numbers: np.ndarray = step_dataframe["Step_Number"].values
+    num_steps = len(step_numbers)
+    step_input = step_input - 1  # reset step_input to count from 0
+    if step_input + 1 > num_steps or step_input < 1:
+        print(f"Invalid step input requested, number of steps: {num_steps}")
+    elif step_input == 0:
+        lower_bound = accel_durations[step_input]
+        upper_bound = np.sum(step_durations[0 : (step_input + 1)])
+    elif step_input > 0:
+        lower_bound = np.sum(step_durations[0:step_input]) + accel_durations[step_input]
+        upper_bound = np.sum(step_durations[0 : (step_input + 1)])
+    else:
+        print("Invalid step input requested, please input integer >= 1")
+    # print(f"\nbounds: {lower_bound}, {upper_bound}")
+    filtered_index_array = np.where((time > lower_bound) & (time < upper_bound))[0]
+    # print(f"\nindex array {filtered_index_array}, \nlength of array {len(filtered_index_array)}")
+    return filtered_index_array
