@@ -15,12 +15,7 @@ def eolt_connect():
 
     connection = pyodbc.connect(
         "DRIVER={ODBC Driver 17 for SQL Server};"
-        r"Server=10.30.0.2\EOLTESTER;"
-        "Database=EOL Management;"
-        "UID=EOLQuery;"
-        "PWD=Yasa1234;"
-        "APP=Python"
-        "Trusted_Connection=yes;"
+        r"Server=CLASSIFIED"
     )
     return connection
 
